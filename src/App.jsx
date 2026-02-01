@@ -1,18 +1,38 @@
 import { useState } from 'react';
-import { WorkoutProvider } from './context/WorkoutContext';
+import { WorkoutProvider, useWorkout } from './context/WorkoutContext';
 import SearchBar from './components/SearchBar';
 import CategoryChips from './components/CategoryChips';
 import ExerciseList from './components/ExerciseList';
 import FloatingActionBar from './components/FloatingActionBar';
 import WorkoutSession from './components/WorkoutSession';
+import WorkoutSummary from './components/WorkoutSummary';
+import RestTimer from './components/RestTimer';
+import CartDrawer from './components/CartDrawer';
 
 function WorkoutLogger() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
-  const [view, setView] = useState('selection'); // selection | session
+  const [view, setView] = useState('selection'); // selection | session | summary
+  const [lastSessionData, setLastSessionData] = useState(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   if (view === 'session') {
-    return <WorkoutSession onBack={() => setView('selection')} />;
+    return (
+      <>
+        <RestTimer />
+        <WorkoutSession
+          onBack={() => setView('selection')}
+          onFinish={(data) => {
+            setLastSessionData(data);
+            setView('summary');
+          }}
+        />
+      </>
+    );
+  }
+
+  if (view === 'summary') {
+    return <WorkoutSummary session={lastSessionData} onHome={() => setView('selection')} />;
   }
 
   return (
@@ -29,7 +49,15 @@ function WorkoutLogger() {
       <SearchBar onSearch={setSearch} />
       <CategoryChips activeCategory={category} onSelectCategory={setCategory} />
       <ExerciseList filter={search} category={category} />
-      <FloatingActionBar onStart={() => setView('session')} />
+      <FloatingActionBar
+        onStart={() => setView('session')}
+        onViewCart={() => setIsCartOpen(true)}
+      />
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        onStart={() => setView('session')}
+      />
     </div>
   );
 }

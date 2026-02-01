@@ -1,7 +1,7 @@
 import { Play } from 'lucide-react';
 import { useWorkout } from '../context/WorkoutContext';
 
-export default function FloatingActionBar({ onStart }) {
+export default function FloatingActionBar({ onStart, onViewCart }) {
     const { count } = useWorkout();
 
     if (count === 0) return null;
@@ -27,7 +27,15 @@ export default function FloatingActionBar({ onStart }) {
             zIndex: 100,
             animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div
+                onClick={onViewCart}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    cursor: 'pointer'
+                }}
+            >
                 <span style={{
                     backgroundColor: 'hsl(var(--color-primary))',
                     color: '#fff',
@@ -43,7 +51,7 @@ export default function FloatingActionBar({ onStart }) {
                     {count}
                 </span>
                 <span style={{ fontSize: '0.875rem', fontWeight: '500' }}>
-                    Selected
+                    View Workout
                 </span>
             </div>
 
