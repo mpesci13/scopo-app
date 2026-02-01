@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { useWorkout } from '../context/WorkoutContext';
+import SaveTemplateModal from './SaveTemplateModal';
 
 export default function WorkoutSummary({ session, onHome }) {
-    const { saveTemplate } = useWorkout();
+    const { saveTemplate, folders, createFolder } = useWorkout();
+    const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+
     if (!session) return null;
 
     // Calculate stats
@@ -63,14 +67,7 @@ export default function WorkoutSummary({ session, onHome }) {
 
             <div style={{ display: 'flex', gap: '1rem' }}>
                 <button
-                    onClick={() => {
-                        const name = window.prompt('Enter template name:');
-                        if (name) {
-                            const exerciseIds = Object.keys(session.exercises);
-                            saveTemplate(name, exerciseIds);
-                            alert('Template saved!');
-                        }
-                    }}
+                    onClick={() => setIsSaveModalOpen(true)}
                     style={{
                         flex: 1,
                         padding: '1rem',
@@ -81,7 +78,7 @@ export default function WorkoutSummary({ session, onHome }) {
                         border: '1px solid hsl(var(--color-primary))'
                     }}
                 >
-                    Save as Template
+                    Save as Workout
                 </button>
                 <button
                     onClick={onHome}
@@ -98,6 +95,15 @@ export default function WorkoutSummary({ session, onHome }) {
                     Finish
                 </button>
             </div>
+            <SaveTemplateModal
+                isOpen={isSaveModalOpen}
+                onClose={() => setIsSaveModalOpen(false)}
+                onSave={(name, folderId) => {
+                    const exerciseIds = Object.keys(session.exercises);
+                    saveTemplate(name, exerciseIds, folderId);
+                    alert('Workout saved!');
+                }}
+            />
         </div>
     );
 }

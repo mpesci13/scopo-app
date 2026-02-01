@@ -47,18 +47,48 @@ export function WorkoutProvider({ children }) {
         localStorage.setItem('scopo-templates', JSON.stringify(templates));
     }, [templates]);
 
-    const saveTemplate = (name, exerciseIds) => {
+    const deleteTemplate = (id) => {
+        setTemplates(prev => prev.filter(t => t.id !== id));
+    };
+
+    // --- Folder State ---
+    const [folders, setFolders] = useState(() => {
+        try {
+            const saved = localStorage.getItem('scopo-folders');
+            return saved ? JSON.parse(saved) : [];
+        } catch { return []; }
+    });
+
+    useEffect(() => {
+        localStorage.setItem('scopo-folders', JSON.stringify(folders));
+    }, [folders]);
+
+    const createFolder = (name) => {
+        const newFolder = {
+            id: Date.now().toString(),
+            name,
+            createdAt: Date.now()
+        };
+        setFolders(prev => [...prev, newFolder]);
+        return newFolder.id;
+    };
+
+    const deleteFolder = (id) => {
+        setFolders(prev => prev.filter(f => f.id !== id));
+        // Also delete or move templates? For now, keep them or move to 'Uncategorized' (null folderId)
+        setTemplates(prev => prev.map(t => t.folderId === id ? { ...t, folderId: null } : t));
+    };
+
+    // Update saveTemplate to accept folderId
+    const saveTemplate = (name, exerciseIds, folderId = null) => {
         const newTemplate = {
             id: Date.now().toString(),
             name,
             exercises: exerciseIds,
+            folderId,
             createdAt: Date.now()
         };
         setTemplates(prev => [...prev, newTemplate]);
-    };
-
-    const deleteTemplate = (id) => {
-        setTemplates(prev => prev.filter(t => t.id !== id));
     };
 
     useEffect(() => {
@@ -195,7 +225,10 @@ export function WorkoutProvider({ children }) {
             exerciseFrequency,
             templates,
             saveTemplate,
-            deleteTemplate
+            deleteTemplate,
+            folders,
+            createFolder,
+            deleteFolder
         }}>
             {children}
         </WorkoutContext.Provider>

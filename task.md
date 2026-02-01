@@ -18,6 +18,10 @@ Last Updated: 2026-01-31
 ## ⏳ In Progress (Current Focus)
 - [x] Quick Add Section (Frequency Tracking).
 - [x] Template System (Save, Browser, One-Tap Start).
+- [x] Dashboard UI & Folders (Home Layout, Grid, Preview).
+- [x] Session Persistence (Resume Feature, Robust State).
+- [x] Hierarchy Refactor (Library > Templates > Workouts, Resume Button Logic).
+- [x] Compact RPE UI (1-5 Inline Picker, Scopo Blue).
 - [x] Expand Exercise Library to 200+ items (String IDs, `bodyPart` key).
 - [x] Implement Pill Filters for Body Parts (Scopo Blue).
 - [x] Refactor Set Logging for Dynamic Schema (Strength/Cardio/Core).

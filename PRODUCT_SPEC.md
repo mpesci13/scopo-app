@@ -8,16 +8,18 @@ Scopo is a premium, minimalist workout tracking app designed for high-performanc
 - **Platform:** iOS-first (React + Vite, targeting Capacitor/Native iOS).
 - **UX Goal:** Minimize "Taps-to-Log." Use ghost text for previous session data.
 
-## 3. Design System (The "Scopo Blue" Theme)
-- **Primary Color:** #0047BA (Royal Blue)
-- **Background:** System support (Light & Dark Mode auto-detection).
-- **Typography:** San Francisco (System UI) for native iOS feel.
-- **Feedback:** Use Haptic feedback for all primary logging actions.
+## 5. Hierarchy & Navigation
+- **Library (Home)**: The main hub. Contains a "Start Empty" button (or "Resume" if active) and a Grid of **Templates**.
+- **Templates**: (Formerly Folders). Collections of specific workouts (e.g., "Hypertrophy", "Strength").
+- **Workouts**: (Formerly Templates). Specific routines (e.g., "Leg Day", "Push A"). Tapping one opens the "Lobby".
+- **Lobby**: A preview screen showing exercise list and last session stats before starting.
 
-## 4. Technical Constraints
-- No complex backend until specified (use LocalStorage or Mock Data for now).
-- Modular Component Architecture (keep logic and UI separate).
-- No unnecessary animations; focus on speed and clarity.
+## 6. RPE System
+- **Scale**: 1-5 (Inline Picker).
+- **UI**: 5 small circles.
+- **Touch**: Tapping a circle marks the RPE.
+- **Visual**: Selected circle fills with Scopo Blue (#0047BA).
+- **Density**: Row height < 60px.
 
 # Scopo Development Task Tracker
 

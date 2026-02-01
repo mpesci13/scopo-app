@@ -2,7 +2,11 @@ import { ChevronLeft } from 'lucide-react';
 import { useWorkout } from '../context/WorkoutContext';
 import { useEffect } from 'react';
 import { MOCK_EXERCISES } from '../data/exercises';
-import RPESlider from './RPESlider';
+import RPEPicker from './RPEPicker';
+
+// ... (inside component)
+
+
 
 export default function WorkoutSession({ onBack, onFinish }) {
     const { cart, session, startSession, updateSet, completeSet, endSession } = useWorkout();
@@ -236,12 +240,18 @@ function SetRow({ set, index, exerciseType, onUpdate, onComplete }) {
                 </button>
             </div>
 
-            {/* RPE SLIDER ROW */}
-            <div style={{ paddingLeft: '2rem' /* align with inputs, skipping index */ }}>
-                <div style={{ marginBottom: '0.25rem', fontSize: '0.75rem', color: 'hsl(var(--color-text-muted))', fontWeight: '500' }}>
-                    RPE (Exertion)
+            {/* RPE PICKER ROW */}
+            <div style={{
+                paddingLeft: '2rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                marginTop: '-0.5rem'
+            }}>
+                <div style={{ fontSize: '0.75rem', color: 'hsl(var(--color-text-muted))', fontWeight: '500' }}>
+                    RPE
                 </div>
-                <RPESlider
+                <RPEPicker
                     value={set.rpe}
                     onChange={(val) => onUpdate('rpe', val)}
                 />
