@@ -13,7 +13,19 @@ Last Updated: 2026-01-31
 - Rest Timer integration (60-second countdown).
 - Post-workout Summary/Receipt view.
 - Persistence (saving session data to LocalStorage).
+- Initial Scaffold.
+
 ## ⏳ In Progress (Current Focus)
-- [x] Implement Scopo Blue (#0047BA) Theme (Light/Dark Mode).
-- [x] Implement Cart Drawer (View/Remove selected items)
+- [x] Quick Add Section (Frequency Tracking).
+- [x] Template System (Save, Browser, One-Tap Start).
+- [x] Expand Exercise Library to 200+ items (String IDs, `bodyPart` key).
+- [x] Implement Pill Filters for Body Parts (Scopo Blue).
+- [x] Refactor Set Logging for Dynamic Schema (Strength/Cardio/Core).
+- [x] Add RPE Calibration Logic (1-10 Input).
+- [x] UI Polish (Thumb-friendly inputs, San Francisco fonts).
+- [x] Implement RPESlider Component (Segmented Control, Haptics).
+- [x] Alphabetical Sorting & Performance Optimization.
+- [x] Integrated Search & Pill Filtering (iOS Style, Empty States).
+- [ ] Implement Scopo Blue (#0047BA) Theme (Light/Dark Mode).
+- [ ] Implement Cart Drawer (View/Remove selected items)
 - [ ] iOS Haptic Feedback triggers.

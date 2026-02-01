@@ -13,6 +13,54 @@ export function WorkoutProvider({ children }) {
         }
     });
 
+    // --- Frequency State ---
+    const [exerciseFrequency, setExerciseFrequency] = useState(() => {
+        try {
+            const saved = localStorage.getItem('scopo-frequency');
+            return saved ? JSON.parse(saved) : {};
+        } catch { return {}; }
+    });
+
+    useEffect(() => {
+        localStorage.setItem('scopo-frequency', JSON.stringify(exerciseFrequency));
+    }, [exerciseFrequency]);
+
+    const incrementFrequency = (ids) => {
+        setExerciseFrequency(prev => {
+            const next = { ...prev };
+            ids.forEach(id => {
+                next[id] = (next[id] || 0) + 1;
+            });
+            return next;
+        });
+    };
+
+    // --- Template State ---
+    const [templates, setTemplates] = useState(() => {
+        try {
+            const saved = localStorage.getItem('scopo-templates');
+            return saved ? JSON.parse(saved) : [];
+        } catch { return []; }
+    });
+
+    useEffect(() => {
+        localStorage.setItem('scopo-templates', JSON.stringify(templates));
+    }, [templates]);
+
+    const saveTemplate = (name, exerciseIds) => {
+        const newTemplate = {
+            id: Date.now().toString(),
+            name,
+            exercises: exerciseIds,
+            createdAt: Date.now()
+        };
+        setTemplates(prev => [...prev, newTemplate]);
+    };
+
+    const deleteTemplate = (id) => {
+        setTemplates(prev => prev.filter(t => t.id !== id));
+    };
+
     useEffect(() => {
         const array = Array.from(cart);
         localStorage.setItem('scopo-cart', JSON.stringify(array));
@@ -64,12 +112,6 @@ export function WorkoutProvider({ children }) {
     }, [restTimer]);
 
     const startSession = (selectedIds) => {
-        // If we already have a session, don't overwrite if it's the same exercises?
-        // For now, always start fresh if explicitly called, or logic handles updates.
-        // In this flow, we assume startSession is called when hitting "Play" on cart.
-
-        // Check if we have an active session that matches?
-        // For simplicity, if session is null, start new.
         if (session) return;
 
         const exercises = {};
@@ -126,6 +168,12 @@ export function WorkoutProvider({ children }) {
 
     const endSession = () => {
         const finalSession = session;
+
+        // Track frequency of exercises used in this session
+        if (finalSession && finalSession.exercises) {
+            incrementFrequency(Object.keys(finalSession.exercises));
+        }
+
         setSession(null);
         setRestTimer(null);
         clearCart();
@@ -143,7 +191,11 @@ export function WorkoutProvider({ children }) {
             updateSet,
             completeSet,
             endSession,
-            restTimer
+            restTimer,
+            exerciseFrequency,
+            templates,
+            saveTemplate,
+            deleteTemplate
         }}>
             {children}
         </WorkoutContext.Provider>

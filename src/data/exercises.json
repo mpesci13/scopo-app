@@ -1,0 +1,1136 @@
+[
+    {
+        "id": "barbell-bench-press",
+        "name": "Barbell Bench Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "dumbbell-bench-press",
+        "name": "Dumbbell Bench Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "incline-barbell-bench-press",
+        "name": "Incline Barbell Bench Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "incline-dumbbell-press",
+        "name": "Incline Dumbbell Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "decline-barbell-bench-press",
+        "name": "Decline Barbell Bench Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "decline-dumbbell-press",
+        "name": "Decline Dumbbell Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "push-up",
+        "name": "Push Up",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "diamond-push-up",
+        "name": "Diamond Push Up",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "weighted-push-up",
+        "name": "Weighted Push Up",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "decline-push-up",
+        "name": "Decline Push Up",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "incline-push-up",
+        "name": "Incline Push Up",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "chest-dip",
+        "name": "Chest Dip",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "assisted-chest-dip",
+        "name": "Assisted Chest Dip",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "machine-chest-press",
+        "name": "Machine Chest Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "smith-machine-bench-press",
+        "name": "Smith Machine Bench Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "cable-crossover-high-to-low",
+        "name": "Cable Crossover (High to Low)",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "cable-crossover-low-to-high",
+        "name": "Cable Crossover (Low to High)",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "cable-chest-fly",
+        "name": "Cable Chest Fly",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "dumbbell-fly",
+        "name": "Dumbbell Fly",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "incline-dumbbell-fly",
+        "name": "Incline Dumbbell Fly",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "pec-deck-machine",
+        "name": "Pec Deck Machine",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "svend-press",
+        "name": "Svend Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "landmine-press",
+        "name": "Landmine Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "floor-press",
+        "name": "Floor Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "plate-pinch-press",
+        "name": "Plate Pinch Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "pull-up",
+        "name": "Pull Up",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "chin-up",
+        "name": "Chin Up",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "neutral-grip-pull-up",
+        "name": "Neutral Grip Pull Up",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "lat-pulldown",
+        "name": "Lat Pulldown",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "close-grip-lat-pulldown",
+        "name": "Close Grip Lat Pulldown",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "reverse-grip-lat-pulldown",
+        "name": "Reverse Grip Lat Pulldown",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "straight-arm-pulldown",
+        "name": "Straight Arm Pulldown",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "barbell-row",
+        "name": "Barbell Row",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "pendlay-row",
+        "name": "Pendlay Row",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "yates-row",
+        "name": "Yates Row",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "dumbbell-row",
+        "name": "Dumbbell Row",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "meadows-row",
+        "name": "Meadows Row",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "seated-cable-row",
+        "name": "Seated Cable Row",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "t-bar-row",
+        "name": "T-Bar Row",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "chest-supported-row",
+        "name": "Chest Supported Row",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "deadlift",
+        "name": "Deadlift",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "rack-pull",
+        "name": "Rack Pull",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "sumo-deadlift",
+        "name": "Sumo Deadlift",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "trap-bar-deadlift",
+        "name": "Trap Bar Deadlift",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "good-morning",
+        "name": "Good Morning",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "back-extension",
+        "name": "Back Extension",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "hyperextension",
+        "name": "Hyperextension",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "face-pull",
+        "name": "Face Pull",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "reverse-fly",
+        "name": "Reverse Fly",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "overhead-press",
+        "name": "Overhead Press",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "seated-dumbbell-press",
+        "name": "Seated Dumbbell Press",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "arnold-press",
+        "name": "Arnold Press",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "push-press",
+        "name": "Push Press",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "lateral-raise",
+        "name": "Lateral Raise",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "cable-lateral-raise",
+        "name": "Cable Lateral Raise",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "front-raise",
+        "name": "Front Raise",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "upright-row",
+        "name": "Upright Row",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "rear-delt-fly",
+        "name": "Rear Delt Fly",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "reverse-pec-deck",
+        "name": "Reverse Pec Deck",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "barbell-shrug",
+        "name": "Barbell Shrug",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "dumbbell-shrug",
+        "name": "Dumbbell Shrug",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "egyptian-lateral-raise",
+        "name": "Egyptian Lateral Raise",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "lu-raise",
+        "name": "Lu Raise",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "smith-machine-overhead-press",
+        "name": "Smith Machine Overhead Press",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "landmine-shoulder-press",
+        "name": "Landmine Shoulder Press",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "squat",
+        "name": "Barbell Squat",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "front-squat",
+        "name": "Front Squat",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "goblet-squat",
+        "name": "Goblet Squat",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "leg-press",
+        "name": "Leg Press",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "hack-squat",
+        "name": "Hack Squat",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "lunge",
+        "name": "Lunge",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "reverse-lunge",
+        "name": "Reverse Lunge",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "walking-lunge",
+        "name": "Walking Lunge",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "bulgarian-split-squat",
+        "name": "Bulgarian Split Squat",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "leg-extension",
+        "name": "Leg Extension",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "hamstring-curl",
+        "name": "Seated Leg Curl",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "lying-leg-curl",
+        "name": "Lying Leg Curl",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "romanian-deadlift",
+        "name": "Romanian Deadlift",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "stiff-leg-deadlift",
+        "name": "Stiff Leg Deadlift",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "dumbbell-rdl",
+        "name": "Dumbbell RDL",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "calf-raise-standing",
+        "name": "Standing Calf Raise",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "calf-raise-seated",
+        "name": "Seated Calf Raise",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "sissy-squat",
+        "name": "Sissy Squat",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "nordic-curl",
+        "name": "Nordic Curl",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "pistol-squat",
+        "name": "Pistol Squat",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "glute-bridge",
+        "name": "Glute Bridge",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "hip-thrust",
+        "name": "Hip Thrust",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "barbell-curl",
+        "name": "Barbell Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "dumbbell-curl",
+        "name": "Dumbbell Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "hammer-curl",
+        "name": "Hammer Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "preacher-curl",
+        "name": "Preacher Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "spider-curl",
+        "name": "Spider Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "cable-curl",
+        "name": "Cable Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "bayesian-curl",
+        "name": "Bayesian Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "concentration-curl",
+        "name": "Concentration Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "tricep-pushdown",
+        "name": "Tricep Pushdown",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "rope-pushdown",
+        "name": "Rope Pushdown",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "skullcrusher",
+        "name": "Skullcrusher",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "overhead-tricep-extension",
+        "name": "Overhead Tricep Extension",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "tricep-dip",
+        "name": "Tricep Dip",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "close-grip-bench-press",
+        "name": "Close Grip Bench Press",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "kickback",
+        "name": "Tricep Kickback",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "wrist-curl",
+        "name": "Wrist Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "reverse-wrist-curl",
+        "name": "Reverse Wrist Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "farmer-carry",
+        "name": "Farmer Carry",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "plank",
+        "name": "Plank",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "side-plank",
+        "name": "Side Plank",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "crunch",
+        "name": "Crunch",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "sit-up",
+        "name": "Sit Up",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "leg-raise",
+        "name": "Leg Raise",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "hanging-leg-raise",
+        "name": "Hanging Leg Raise",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "toes-to-bar",
+        "name": "Toes to Bar",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "russian-twist",
+        "name": "Russian Twist",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "bicycle-crunch",
+        "name": "Bicycle Crunch",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "mountain-climber",
+        "name": "Mountain Climber",
+        "bodyPart": "Core",
+        "type": "cardio"
+    },
+    {
+        "id": "ab-wheel-rollout",
+        "name": "Ab Wheel Rollout",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "cable-crunch",
+        "name": "Cable Crunch",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "woodchop",
+        "name": "Cable Woodchop",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "vacuum",
+        "name": "Stomach Vacuum",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "deadbug",
+        "name": "Deadbug",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "bird-dog",
+        "name": "Bird Dog",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "treadmill-run",
+        "name": "Treadmill Run",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "outdoor-run",
+        "name": "Outdoor Run",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "sprinting",
+        "name": "Sprinting",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "cycling",
+        "name": "Cycling",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "stationary-bike",
+        "name": "Stationary Bike",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "elliptical",
+        "name": "Elliptical",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "rowing-machine",
+        "name": "Rowing Machine",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "stair-climber",
+        "name": "Stair Climber",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "jump-rope",
+        "name": "Jump Rope",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "burpees",
+        "name": "Burpees",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "jumping-jacks",
+        "name": "Jumping Jacks",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "box-jump",
+        "name": "Box Jump",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "battle-ropes",
+        "name": "Battle Ropes",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "walking",
+        "name": "Walking",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "swimming",
+        "name": "Swimming",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "hiking",
+        "name": "Hiking",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "kettlebell-swing",
+        "name": "Kettlebell Swing",
+        "bodyPart": "Full Body",
+        "type": "strength"
+    },
+    {
+        "id": "clean-and-jerk",
+        "name": "Clean and Jerk",
+        "bodyPart": "Full Body",
+        "type": "strength"
+    },
+    {
+        "id": "snatch",
+        "name": "Snatch",
+        "bodyPart": "Full Body",
+        "type": "strength"
+    },
+    {
+        "id": "thruster",
+        "name": "Thruster",
+        "bodyPart": "Full Body",
+        "type": "strength"
+    },
+    {
+        "id": "turkish-get-up",
+        "name": "Turkish Get Up",
+        "bodyPart": "Full Body",
+        "type": "strength"
+    },
+    {
+        "id": "man-maker",
+        "name": "Man Maker",
+        "bodyPart": "Full Body",
+        "type": "strength"
+    },
+    {
+        "id": "tire-flip",
+        "name": "Tire Flip",
+        "bodyPart": "Full Body",
+        "type": "strength"
+    },
+    {
+        "id": "sled-push",
+        "name": "Sled Push",
+        "bodyPart": "Full Body",
+        "type": "strength"
+    },
+    {
+        "id": "sled-pull",
+        "name": "Sled Pull",
+        "bodyPart": "Full Body",
+        "type": "strength"
+    },
+    {
+        "id": "wall-ball",
+        "name": "Wall Ball",
+        "bodyPart": "Full Body",
+        "type": "cardio"
+    },
+    {
+        "id": "muscle-up",
+        "name": "Muscle Up",
+        "bodyPart": "Full Body",
+        "type": "strength"
+    },
+    {
+        "id": "zercher-squat",
+        "name": "Zercher Squat",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "jefferson-curl",
+        "name": "Jefferson Curl",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "pullover-dumbbell",
+        "name": "Dumbbell Pullover",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "pullover-lat",
+        "name": "Lat Pullover",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "renegade-row",
+        "name": "Renegade Row",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "dumbbell-bench-press-neutral",
+        "name": "Neutral Grip DB Bench Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "hex-press",
+        "name": "Hex Press",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "wide-grip-pull-up",
+        "name": "Wide Grip Pull Up",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "inverted-row",
+        "name": "Inverted Row",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "single-arm-lat-pulldown",
+        "name": "Single Arm Lat Pulldown",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "seal-row",
+        "name": "Seal Row",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "single-leg-deadlift",
+        "name": "Single Leg Deadlift",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "cossack-squat",
+        "name": "Cossack Squat",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "step-up",
+        "name": "Step Up",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "donkey-kick",
+        "name": "Donkey Kick",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "seated-calf-raise-machine",
+        "name": "Machine Seated Calf Raise",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "standing-calf-raise-machine",
+        "name": "Machine Standing Calf Raise",
+        "bodyPart": "Legs",
+        "type": "strength"
+    },
+    {
+        "id": "z-press",
+        "name": "Z Press",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "scaption",
+        "name": "Scaption",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "single-arm-overhead-press",
+        "name": "Single Arm Overhead Press",
+        "bodyPart": "Shoulders",
+        "type": "strength"
+    },
+    {
+        "id": "drag-curl",
+        "name": "Drag Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "waiter-curl",
+        "name": "Waiter Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "reverse-curl",
+        "name": "Reverse Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "zm-curl",
+        "name": "Zottman Curl",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "tate-press",
+        "name": "Tate Press",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "jm-press",
+        "name": "JM Press",
+        "bodyPart": "Arms",
+        "type": "strength"
+    },
+    {
+        "id": "diamond-pushup-knees",
+        "name": "Diamond Pushup (Knees)",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "knee-pushup",
+        "name": "Knee Pushup",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "wall-pushup",
+        "name": "Wall Pushup",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "archer-pushup",
+        "name": "Archer Pushup",
+        "bodyPart": "Chest",
+        "type": "strength"
+    },
+    {
+        "id": "superman",
+        "name": "Superman",
+        "bodyPart": "Back",
+        "type": "strength"
+    },
+    {
+        "id": "flutter-kicks",
+        "name": "Flutter Kicks",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "reverse-crunch",
+        "name": "Reverse Crunch",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "heel-touches",
+        "name": "Heel Touches",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "v-up",
+        "name": "V-Up",
+        "bodyPart": "Core",
+        "type": "core"
+    },
+    {
+        "id": "bear-crawl",
+        "name": "Bear Crawl",
+        "bodyPart": "Full Body",
+        "type": "cardio"
+    },
+    {
+        "id": "crab-walk",
+        "name": "Crab Walk",
+        "bodyPart": "Full Body",
+        "type": "cardio"
+    },
+    {
+        "id": "high-knees",
+        "name": "High Knees",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "butt-kicks",
+        "name": "Butt Kicks",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "skaters",
+        "name": "Skaters",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    },
+    {
+        "id": "shadow-boxing",
+        "name": "Shadow Boxing",
+        "bodyPart": "Cardio",
+        "type": "cardio"
+    }
+]

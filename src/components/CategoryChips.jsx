@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const CATEGORIES = ['All', 'Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Cardio'];
+const CATEGORIES = ['All', 'Full Body', 'Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio'];
 
 export default function CategoryChips({ activeCategory, onSelectCategory }) {
     // Local state for demo if not controlled, but usually controlled by parent

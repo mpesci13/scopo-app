@@ -1,6 +1,8 @@
 import { CheckCircle } from 'lucide-react';
+import { useWorkout } from '../context/WorkoutContext';
 
 export default function WorkoutSummary({ session, onHome }) {
+    const { saveTemplate } = useWorkout();
     if (!session) return null;
 
     // Calculate stats
@@ -11,9 +13,12 @@ export default function WorkoutSummary({ session, onHome }) {
 
     Object.values(session.exercises).forEach(sets => {
         sets.forEach(set => {
-            if (set.completed && set.weight && set.reps) {
-                totalVolume += (parseFloat(set.weight) * parseFloat(set.reps));
+            if (set.completed) {
                 totalSets++;
+                // Only calculate volume if weight and reps exist
+                if (set.weight && set.reps) {
+                    totalVolume += (parseFloat(set.weight) * parseFloat(set.reps));
+                }
             }
         });
     });
@@ -56,20 +61,43 @@ export default function WorkoutSummary({ session, onHome }) {
                 <StatCard label="Work Rate" value={workRate} />
             </div>
 
-            <button
-                onClick={onHome}
-                style={{
-                    width: '100%',
-                    padding: '1rem',
-                    backgroundColor: 'hsl(var(--color-surface))',
-                    color: 'hsl(var(--color-text))',
-                    borderRadius: 'var(--radius-lg)',
-                    fontWeight: 'bold',
-                    border: '1px solid hsl(var(--color-border))'
-                }}
-            >
-                Back to Home
-            </button>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+                <button
+                    onClick={() => {
+                        const name = window.prompt('Enter template name:');
+                        if (name) {
+                            const exerciseIds = Object.keys(session.exercises);
+                            saveTemplate(name, exerciseIds);
+                            alert('Template saved!');
+                        }
+                    }}
+                    style={{
+                        flex: 1,
+                        padding: '1rem',
+                        backgroundColor: 'hsl(var(--color-surface))',
+                        color: 'hsl(var(--color-primary))',
+                        borderRadius: 'var(--radius-lg)',
+                        fontWeight: 'bold',
+                        border: '1px solid hsl(var(--color-primary))'
+                    }}
+                >
+                    Save as Template
+                </button>
+                <button
+                    onClick={onHome}
+                    style={{
+                        flex: 1,
+                        padding: '1rem',
+                        backgroundColor: 'hsl(var(--color-primary))',
+                        color: 'white',
+                        borderRadius: 'var(--radius-lg)',
+                        fontWeight: 'bold',
+                        border: 'none'
+                    }}
+                >
+                    Finish
+                </button>
+            </div>
         </div>
     );
 }
