@@ -117,7 +117,20 @@ input {
   height: 6px;
 }
 
+
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--color-surface-hover));
   border-radius: var(--radius-full);
+}
+
+.ghost-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  color: hsl(var(--color-text-muted));
+  opacity: 0.4;
+  font-size: 0.8rem;
+  font-weight: 600;
 }

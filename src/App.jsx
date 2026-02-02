@@ -107,14 +107,37 @@ function WorkoutLogger() {
       {renderHeader()}
 
       {view === 'dashboard' && (
-        <Dashboard
-          onStartEmpty={() => setView('selection')}
-          onResume={() => setView('session')}
-          onSelectFolder={(folderId) => {
-            setActiveFolderId(folderId);
-            setView('folder');
-          }}
-        />
+        <>
+          <Dashboard
+            onStartEmpty={() => setView('selection')}
+            onResume={() => setView('session')}
+            onSelectFolder={(folderId) => {
+              setActiveFolderId(folderId);
+              setView('folder');
+            }}
+          />
+
+          <button
+            onClick={() => {
+              if (confirm('Create fresh start? This deletes all data.')) {
+                localStorage.clear();
+                window.location.reload();
+              }
+            }}
+            style={{
+              marginTop: '2rem',
+              width: '100%',
+              padding: '1rem',
+              backgroundColor: 'transparent',
+              color: 'hsl(var(--color-text-muted))',
+              fontSize: '0.8rem',
+              border: '1px dashed var(--color-border)',
+              opacity: 0.6
+            }}
+          >
+            Reset App Data (Testing)
+          </button>
+        </>
       )}
 
       {view === 'folder' && (

@@ -118,6 +118,8 @@ export function WorkoutProvider({ children }) {
         } catch { return null; }
     });
 
+    // --- Timer State ---
+    // --- Timer State ---
     const [restTimer, setRestTimer] = useState(null);
 
     // Persist session
@@ -145,13 +147,38 @@ export function WorkoutProvider({ children }) {
         if (session) return;
 
         const exercises = {};
+        const exerciseSettings = {};
+
         selectedIds.forEach(id => {
             exercises[id] = [{ id: Date.now() + Math.random(), weight: '', reps: '', completed: false }];
+            // Default: Timer OFF, 60s duration
+            exerciseSettings[id] = { timerEnabled: false, timerDuration: 60 };
         });
 
         setSession({
             startTime: Date.now(),
-            exercises
+            exercises,
+            exerciseSettings
+        });
+    };
+
+    const addSet = (exId) => {
+        setSession(prev => {
+            if (!prev) return null;
+            const newEx = { ...prev.exercises };
+            const sets = [...newEx[exId]];
+
+            // Clone previous set values if available, else empty
+            const prevSet = sets[sets.length - 1];
+            sets.push({
+                id: Date.now() + Math.random(),
+                weight: prevSet ? prevSet.weight : '',
+                reps: prevSet ? prevSet.reps : '',
+                completed: false
+            });
+
+            newEx[exId] = sets;
+            return { ...prev, exercises: newEx };
         });
     };
 
@@ -166,6 +193,15 @@ export function WorkoutProvider({ children }) {
         });
     };
 
+    const updateExerciseSettings = (exId, settings) => {
+        setSession(prev => {
+            if (!prev) return null;
+            const newSettings = { ...prev.exerciseSettings };
+            newSettings[exId] = { ...newSettings[exId], ...settings };
+            return { ...prev, exerciseSettings: newSettings };
+        });
+    };
+
     const completeSet = (exId, setIndex) => {
         setSession(prev => {
             if (!prev) return null;
@@ -177,18 +213,11 @@ export function WorkoutProvider({ children }) {
             newEx[exId] = sets;
 
             if (isCompleting) {
-                // Trigger 60s timer
-                setRestTimer({ startTime: Date.now(), duration: 60 });
+                const settings = prev.exerciseSettings ? prev.exerciseSettings[exId] : { timerEnabled: false, timerDuration: 60 };
 
-                // Auto-add next set if this was the last one
-                if (setIndex === sets.length - 1) {
-                    const prevSet = sets[setIndex];
-                    sets.push({
-                        id: Date.now() + Math.random(),
-                        weight: prevSet.weight,
-                        reps: prevSet.reps,
-                        completed: false
-                    });
+                if (settings.timerEnabled) {
+                    // Trigger timer with specific duration
+                    setRestTimer({ startTime: Date.now(), duration: settings.timerDuration });
                 }
             }
 
@@ -218,10 +247,12 @@ export function WorkoutProvider({ children }) {
             count: cart.size,
             session,
             startSession,
+            addSet,
             updateSet,
             completeSet,
             endSession,
             restTimer,
+
             exerciseFrequency,
             templates,
             saveTemplate,

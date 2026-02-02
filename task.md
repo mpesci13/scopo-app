@@ -18,6 +18,12 @@ Last Updated: 2026-01-31
 ## ⏳ In Progress (Current Focus)
 - [x] Quick Add Section (Frequency Tracking).
 - [x] Template System (Save, Browser, One-Tap Start).
+- [x] Master Exercise Database (200+ items, Toggle Field).
+- [x] Toggle Logic Implementation (Bodyweight/Weighted/Assisted UI).
+- [x] Single Row Logging UI (LBS/REPS/RPE inline, placeholders).
+- [x] Manual Set Management (Add Set button, Timer Toggle, No Auto-Add).
+- [x] Per-Exercise Rest Timer (Individual ON/OFF, Custom Duration, Default OFF).
+- [x] Save Template Feature (Button in Active Workout, Modal, Persistence).
 - [x] Dashboard UI & Folders (Home Layout, Grid, Preview).
 - [x] Session Persistence (Resume Feature, Robust State).
 - [x] Hierarchy Refactor (Library > Templates > Workouts, Resume Button Logic).
