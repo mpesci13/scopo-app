@@ -1,4 +1,4 @@
-import { ChevronLeft, Save, X } from 'lucide-react';
+import { ChevronLeft, X, Clock, AlertTriangle } from 'lucide-react';
 import { useWorkout } from '../context/WorkoutContext';
 import { useEffect, useState } from 'react';
 import { MOCK_EXERCISES } from '../data/exercises';
@@ -10,12 +10,11 @@ import { MOCK_EXERCISES } from '../data/exercises';
 
 export default function WorkoutSession({ onBack, onFinish }) {
     const {
-        cart, session, startSession, addSet, updateSet, completeSet, endSession,
-        updateExerciseSettings, saveTemplate
+        cart, session, startSession, addSet, updateSet, completeSet, completeAllSets, endSession,
+        updateExerciseSettings
     } = useWorkout();
 
-    const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-    const [templateName, setTemplateName] = useState('');
+    const [isFinishModalOpen, setIsFinishModalOpen] = useState(false);
 
     // Init session if needed
     useEffect(() => {
@@ -28,9 +27,34 @@ export default function WorkoutSession({ onBack, onFinish }) {
 
     const selectedExercises = MOCK_EXERCISES.filter(ex => session.exercises.hasOwnProperty(ex.id));
 
+    // Calculate total sets for guardrail
+    const totalSets = Object.values(session.exercises).reduce((acc, sets) => acc + sets.length, 0);
+
     const handleFinish = () => {
-        const finalData = endSession();
-        onFinish?.(finalData);
+        setIsFinishModalOpen(true);
+    };
+
+    const confirmFinish = (completeAll = false) => {
+        if (completeAll) {
+            completeAllSets();
+        }
+        // Small timeout to allow state update to propagate? 
+        // Actually endSession reads 'session' from state. 
+        // React state updates are batched. 
+        // endSession() inside the same event loop might see old state.
+        // We should pass a flag to endSession or let endSession handle it?
+        // Or simpler: just setTimeout.
+        setTimeout(() => {
+            const finalData = endSession();
+            onFinish?.(finalData);
+        }, 50);
+    };
+
+    const handleCancel = () => {
+        if (confirm('Cancel workout? This will discard your progress.')) {
+            endSession(); // Discard
+            onBack(); // Go home
+        }
     };
 
     return (
@@ -38,7 +62,7 @@ export default function WorkoutSession({ onBack, onFinish }) {
             <header style={{ marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
                     <button
-                        onClick={onBack}
+                        onClick={onBack} // Or Cancel? usually Back just minimizes. Cancel destroys.
                         style={{
                             padding: 'var(--space-sm)',
                             marginLeft: '-0.5rem',
@@ -47,9 +71,12 @@ export default function WorkoutSession({ onBack, onFinish }) {
                     >
                         <ChevronLeft />
                     </button>
-                    <h1 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)' }}>
-                        Active Workout
-                    </h1>
+                    <div>
+                        <h1 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)', lineHeight: '1.1' }}>
+                            Active Workout
+                        </h1>
+                        <RunningClock startTime={session.startTime} />
+                    </div>
                 </div>
 
 
@@ -153,117 +180,125 @@ export default function WorkoutSession({ onBack, onFinish }) {
                 })}
             </div>
 
-            {/* SAVE TEMPLATE BUTTON & MODAL */}
             <button
-                onClick={() => setIsSaveModalOpen(true)}
+                onClick={handleCancel}
                 style={{
                     marginTop: 'var(--space-xl)',
                     marginBottom: '1rem',
                     width: '100%',
                     padding: '1rem',
                     backgroundColor: 'transparent',
-                    color: 'hsl(var(--color-primary))',
+                    color: 'hsl(var(--color-destruct))',
                     borderRadius: 'var(--radius-full)',
                     fontWeight: 'bold',
-                    border: '2px solid hsl(var(--color-primary))',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem'
+                    border: '1px solid hsl(var(--color-destruct))'
                 }}>
-                <Save size={20} />
-                Save as Template
+                Cancel Workout
             </button>
 
-            {isSaveModalOpen && (
+            <button
+                disabled={totalSets === 0}
+                onClick={handleFinish}
+                style={{
+                    width: '100%',
+                    padding: '1rem',
+                    backgroundColor: 'hsl(var(--color-destruct))',
+                    color: 'white',
+                    borderRadius: 'var(--radius-full)',
+                    fontWeight: 'bold',
+                    opacity: totalSets === 0 ? 0.5 : 1
+                }}>
+                Finish Workout
+            </button>
+
+            {/* FINISH ACTIONSHEET/MODAL */}
+            {isFinishModalOpen && (
                 <div style={{
                     position: 'fixed',
                     top: 0,
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    backgroundColor: 'rgba(0,0,0,0.6)',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1000,
-                    padding: '2rem'
-                }}>
+                    alignItems: 'flex-end',
+                    zIndex: 2000
+                }} onClick={() => setIsFinishModalOpen(false)}>
                     <div style={{
-                        backgroundColor: 'hsl(var(--color-surface))',
-                        padding: '2rem',
-                        borderRadius: 'var(--radius-lg)',
                         width: '100%',
-                        maxWidth: '400px',
+                        backgroundColor: 'hsl(var(--color-surface))',
+                        borderTopLeftRadius: 'var(--radius-xl)',
+                        borderTopRightRadius: 'var(--radius-xl)',
+                        padding: '1.5rem',
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '1.5rem'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Save Template</h2>
-                            <button onClick={() => setIsSaveModalOpen(false)}>
-                                <X />
-                            </button>
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Template Name</label>
-                            <input
-                                autoFocus
-                                type="text"
-                                value={templateName}
-                                onChange={(e) => setTemplateName(e.target.value)}
-                                placeholder="e.g., Pull Day"
-                                style={{
-                                    width: '100%',
-                                    padding: '0.75rem',
-                                    borderRadius: 'var(--radius-md)',
-                                    border: '1px solid var(--color-border)',
-                                    backgroundColor: 'hsl(var(--color-bg))',
-                                    color: 'hsl(var(--color-text))',
-                                    fontSize: '1rem'
-                                }}
-                            />
-                        </div>
+                        gap: '1rem',
+                        animation: 'slideUp 0.3s ease-out'
+                    }} onClick={e => e.stopPropagation()}>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Finish Workout?</h3>
 
                         <button
-                            disabled={!templateName.trim()}
-                            onClick={() => {
-                                saveTemplate(templateName, Object.keys(session.exercises));
-                                setIsSaveModalOpen(false);
-                                setTemplateName('');
-                                alert('Template Saved!');
-                            }}
-                            style={{
-                                width: '100%',
-                                padding: '1rem',
-                                backgroundColor: 'hsl(var(--color-primary))',
-                                color: 'white',
-                                borderRadius: 'var(--radius-full)',
-                                fontWeight: 'bold',
-                                opacity: templateName.trim() ? 1 : 0.5
-                            }}
+                            onClick={() => confirmFinish(true)}
+                            style={{ padding: '1rem', backgroundColor: 'hsl(var(--color-primary))', color: 'white', borderRadius: 'var(--radius-lg)', fontWeight: 'bold' }}
                         >
-                            Save Template
+                            Complete Unfinished Sets & Finish
+                        </button>
+
+                        <button
+                            onClick={() => confirmFinish(false)}
+                            style={{ padding: '1rem', backgroundColor: 'hsl(var(--color-bg))', color: 'hsl(var(--color-text))', borderRadius: 'var(--radius-lg)', fontWeight: 'bold' }}
+                        >
+                            Finish (Leave Unfinished)
+                        </button>
+
+                        <button
+                            onClick={handleCancel}
+                            style={{ padding: '1rem', backgroundColor: 'rgba(255, 59, 48, 0.1)', color: 'hsl(var(--color-destruct))', borderRadius: 'var(--radius-lg)', fontWeight: 'bold' }}
+                        >
+                            Delete Workout
+                        </button>
+
+                        <button
+                            onClick={() => setIsFinishModalOpen(false)}
+                            style={{ padding: '1rem', marginTop: '0.5rem', backgroundColor: 'transparent', color: 'hsl(var(--color-text-muted))', fontWeight: 'bold' }}
+                        >
+                            Cancel
                         </button>
                     </div>
                 </div>
             )}
 
-            <button
-                onClick={handleFinish}
-                style={{
-                    marginTop: 'var(--space-xl)',
-                    width: '100%',
-                    padding: '1rem',
-                    backgroundColor: 'hsl(var(--color-destruct))',
-                    color: 'white',
-                    borderRadius: 'var(--radius-full)',
-                    fontWeight: 'bold'
-                }}>
-                Finish Workout
-            </button>
+            <style>{`
+                @keyframes slideUp {
+                    from { transform: translateY(100%); }
+                    to { transform: translateY(0); }
+                }
+            `}</style>
         </div >
+    );
+}
+
+function RunningClock({ startTime }) {
+    const [elapsed, setElapsed] = useState('00:00');
+
+    useEffect(() => {
+        const update = () => {
+            const now = Date.now();
+            const diff = Math.floor((now - startTime) / 1000);
+            const m = Math.floor(diff / 60).toString().padStart(2, '0');
+            const s = (diff % 60).toString().padStart(2, '0');
+            setElapsed(`${m}:${s}`);
+        };
+        update();
+        const interval = setInterval(update, 1000);
+        return () => clearInterval(interval);
+    }, [startTime]);
+
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'hsl(var(--color-text-muted))', fontSize: '0.9rem' }}>
+            <Clock size={14} />
+            <span>{elapsed}</span>
+        </div>
     );
 }
 

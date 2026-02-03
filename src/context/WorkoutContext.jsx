@@ -131,17 +131,9 @@ export function WorkoutProvider({ children }) {
         }
     }, [session]);
 
-    // Timer Tick
-    useEffect(() => {
-        if (!restTimer) return;
-        const interval = setInterval(() => {
-            const elapsed = (Date.now() - restTimer.startTime) / 1000;
-            if (elapsed >= restTimer.duration) {
-                setRestTimer(null); // Timer finished
-            }
-        }, 500);
-        return () => clearInterval(interval);
-    }, [restTimer]);
+    // Timer Tick (Optional: Just for debug or if we wanted to play a sound)
+    // For now, we rely on the component to update UI. 
+    // We removed the auto-dismiss so it counts up.
 
     const startSession = (selectedIds) => {
         if (session) return;
@@ -225,6 +217,24 @@ export function WorkoutProvider({ children }) {
         });
     };
 
+    const completeAllSets = () => {
+        setSession(prev => {
+            if (!prev) return null;
+            const newEx = { ...prev.exercises };
+            // Iterate all exercises and sets
+            Object.keys(newEx).forEach(exId => {
+                newEx[exId] = newEx[exId].map(set => {
+                    // Mark as completed if it has data (weight OR reps) and isn't already
+                    if ((set.weight || set.reps) && !set.completed) {
+                        return { ...set, completed: true };
+                    }
+                    return set;
+                });
+            });
+            return { ...prev, exercises: newEx };
+        });
+    };
+
     const endSession = () => {
         const finalSession = session;
 
@@ -250,6 +260,7 @@ export function WorkoutProvider({ children }) {
             addSet,
             updateSet,
             completeSet,
+            completeAllSets,
             endSession,
             restTimer,
 

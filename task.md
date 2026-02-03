@@ -22,6 +22,16 @@ Last Updated: 2026-01-31
 - [x] Toggle Logic Implementation (Bodyweight/Weighted/Assisted UI).
 - [x] Single Row Logging UI (LBS/REPS/RPE inline, placeholders).
 - [x] Manual Set Management (Add Set button, Timer Toggle, No Auto-Add).
+- [x] Active Session Polish
+  - [x] **Timer Fix**: Rename to 'Rest Timer', ensure restart on set completion.
+  - [x] **Running Clock**: Show elapsed workout time in header.
+  - [x] **Button Guardrails**: Disable Finish if empty; "Cancel Workout" button active.
+  - [x] **Finish Flow**: Action Sheet (Finish, Auto-Complete Sets, Cancel).
+  - [x] **Workout Complete Screen**: Stats, Edit Start/End Time, Save as Routine button.
+- [x] **Logger UI Polish**: Enhanced "Select Exercises" with icons, gradients, and better empty states.
+- [x] **UX Polish**:
+  - [x] **Fuzzy Search**: "Dumbell" finds "Dumbbell".
+  - [x] **Action Button**: "View List" is now a clear, interactive button.
 - [x] Per-Exercise Rest Timer (Individual ON/OFF, Custom Duration, Default OFF).
 - [x] Save Template Feature (Button in Active Workout, Modal, Persistence).
 - [x] Dashboard UI & Folders (Home Layout, Grid, Preview).

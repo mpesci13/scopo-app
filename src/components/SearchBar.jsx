@@ -27,15 +27,18 @@ export default function SearchBar({ value, onSearch }) {
                     fontSize: 'var(--font-size-base)',
                     color: 'hsl(var(--color-text))',
                     border: '1px solid transparent',
-                    transition: 'all 0.2s ease',
+                    transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                 }}
                 onFocus={(e) => {
                     e.target.style.borderColor = 'hsl(var(--color-primary))';
-                    e.target.style.backgroundColor = 'hsl(var(--color-surface-hover))';
+                    e.target.style.backgroundColor = 'hsl(var(--color-surface))';
+                    e.target.style.boxShadow = '0 0 0 4px var(--color-primary-glow)';
                 }}
                 onBlur={(e) => {
                     e.target.style.borderColor = 'transparent';
                     e.target.style.backgroundColor = 'hsl(var(--color-surface))';
+                    e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
                 }}
             />
             {value && (

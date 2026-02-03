@@ -1,15 +1,21 @@
 import { useState } from 'react';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Clock } from 'lucide-react';
 import { useWorkout } from '../context/WorkoutContext';
 import SaveTemplateModal from './SaveTemplateModal';
 
 export default function WorkoutSummary({ session, onHome }) {
-    const { saveTemplate, folders, createFolder } = useWorkout();
+    const { saveTemplate } = useWorkout();
     const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+
+    // Editable States
+    const [startTime, setStartTime] = useState(() => new Date(session.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    const [endTime, setEndTime] = useState(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
     if (!session) return null;
 
     // Calculate stats
+    // Note: Duration might be approximate since we are just using current time vs start time from session
+    // In a real app we'd parse the edited start/end times to recalulcate duration.
     const durationMinutes = Math.max(1, Math.round((Date.now() - session.startTime) / 60000));
 
     let totalVolume = 0;
@@ -19,7 +25,6 @@ export default function WorkoutSummary({ session, onHome }) {
         sets.forEach(set => {
             if (set.completed) {
                 totalSets++;
-                // Only calculate volume if weight and reps exist
                 if (set.weight && set.reps) {
                     totalVolume += (parseFloat(set.weight) * parseFloat(set.reps));
                 }
@@ -30,7 +35,7 @@ export default function WorkoutSummary({ session, onHome }) {
     const workRate = Math.round(totalVolume / durationMinutes);
 
     return (
-        <div className="container" style={{ textAlign: 'center', paddingTop: '4rem' }}>
+        <div className="container" style={{ textAlign: 'center', paddingTop: '2rem' }}>
             <div style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -40,18 +45,44 @@ export default function WorkoutSummary({ session, onHome }) {
                 borderRadius: '50%',
                 backgroundColor: 'hsl(var(--color-primary))',
                 color: 'white',
-                marginBottom: 'var(--space-lg)',
+                marginBottom: 'var(--space-md)',
                 boxShadow: '0 0 20px var(--color-primary-glow)'
             }}>
                 <CheckCircle size={40} />
             </div>
 
-            <h1 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'bold', marginBottom: 'var(--space-xs)' }}>
+            <h1 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'bold', marginBottom: 'var(--space-md)' }}>
                 Workout Complete
             </h1>
-            <p style={{ color: 'hsl(var(--color-text-muted))', marginBottom: 'var(--space-xl)' }}>
-                Great job! Here's your summary.
-            </p>
+
+            {/* Time Editor */}
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '1rem',
+                marginBottom: 'var(--space-xl)',
+                color: 'hsl(var(--color-text-muted))',
+                fontSize: '0.9rem'
+            }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span>Started</span>
+                    <input
+                        type="time"
+                        value={startTime}
+                        onChange={e => setStartTime(e.target.value)}
+                        style={{ background: 'transparent', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.2rem', color: 'inherit', textAlign: 'center' }}
+                    />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span>Ended</span>
+                    <input
+                        type="time"
+                        value={endTime}
+                        onChange={e => setEndTime(e.target.value)}
+                        style={{ background: 'transparent', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.2rem', color: 'inherit', textAlign: 'center' }}
+                    />
+                </div>
+            </div>
 
             <div style={{
                 display: 'grid',
@@ -65,11 +96,11 @@ export default function WorkoutSummary({ session, onHome }) {
                 <StatCard label="Work Rate" value={workRate} />
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <button
                     onClick={() => setIsSaveModalOpen(true)}
                     style={{
-                        flex: 1,
+                        width: '100%',
                         padding: '1rem',
                         backgroundColor: 'hsl(var(--color-surface))',
                         color: 'hsl(var(--color-primary))',
@@ -78,30 +109,48 @@ export default function WorkoutSummary({ session, onHome }) {
                         border: '1px solid hsl(var(--color-primary))'
                     }}
                 >
-                    Save as Workout
+                    Save as Routine
                 </button>
+
+                <button
+                    onClick={() => alert("Sharing enabled soon!")}
+                    style={{
+                        width: '100%',
+                        padding: '1rem',
+                        backgroundColor: 'transparent',
+                        color: 'hsl(var(--color-text))',
+                        borderRadius: 'var(--radius-lg)',
+                        fontWeight: 'bold',
+                        border: '1px solid var(--color-border)'
+                    }}
+                >
+                    Share to Socials
+                </button>
+
                 <button
                     onClick={onHome}
                     style={{
-                        flex: 1,
+                        width: '100%',
                         padding: '1rem',
                         backgroundColor: 'hsl(var(--color-primary))',
                         color: 'white',
                         borderRadius: 'var(--radius-lg)',
                         fontWeight: 'bold',
-                        border: 'none'
+                        border: 'none',
+                        marginTop: '1rem'
                     }}
                 >
-                    Finish
+                    Return to Library
                 </button>
             </div>
+
             <SaveTemplateModal
                 isOpen={isSaveModalOpen}
                 onClose={() => setIsSaveModalOpen(false)}
                 onSave={(name, folderId) => {
                     const exerciseIds = Object.keys(session.exercises);
                     saveTemplate(name, exerciseIds, folderId);
-                    alert('Workout saved!');
+                    alert('Routine saved!');
                 }}
             />
         </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const CATEGORIES = ['All', 'Full Body', 'Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio'];
+const CATEGORIES = ['All', 'Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio'];
 
 export default function CategoryChips({ activeCategory, onSelectCategory }) {
     // Local state for demo if not controlled, but usually controlled by parent
@@ -36,7 +36,10 @@ export default function CategoryChips({ activeCategory, onSelectCategory }) {
                             fontSize: 'var(--font-size-sm)',
                             fontWeight: 'var(--font-weight-medium)',
                             whiteSpace: 'nowrap',
-                            transition: 'all 0.2s ease',
+                            transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                            boxShadow: isActive ? '0 0 12px var(--color-primary-glow)' : 'none',
+                            transform: isActive ? 'scale(1.05)' : 'scale(1)',
+                            border: '1px solid transparent',
                         }}
                     >
                         {cat}

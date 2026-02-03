@@ -27,33 +27,42 @@ export default function FloatingActionBar({ onStart, onViewCart }) {
             zIndex: 100,
             animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}>
-            <div
+            <button
                 onClick={onViewCart}
                 style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer'
+                    gap: '0.75rem',
+                    cursor: 'pointer',
+                    backgroundColor: 'hsla(var(--color-primary), 0.1)',
+                    padding: '0.5rem 1rem 0.5rem 0.75rem',
+                    borderRadius: 'var(--radius-full)',
+                    border: '1px solid transparent',
+                    transition: 'all 0.2s ease',
+                    color: 'hsl(var(--color-primary))'
                 }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'hsla(var(--color-primary), 0.15)'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'hsla(var(--color-primary), 0.1)'}
             >
-                <span style={{
+                <div style={{
                     backgroundColor: 'hsl(var(--color-primary))',
                     color: '#fff',
-                    width: '24px',
-                    height: '24px',
+                    width: '20px',
+                    height: '20px',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '0.75rem',
-                    fontWeight: 'bold'
+                    fontSize: '0.7rem',
+                    fontWeight: 'bold',
+                    pointerEvents: 'none'
                 }}>
                     {count}
+                </div>
+                <span style={{ fontSize: '0.875rem', fontWeight: '600', pointerEvents: 'none' }}>
+                    View List
                 </span>
-                <span style={{ fontSize: '0.875rem', fontWeight: '500' }}>
-                    View Workout
-                </span>
-            </div>
+            </button>
 
             <button
                 onClick={onStart}
