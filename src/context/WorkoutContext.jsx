@@ -23,20 +23,27 @@ export const WorkoutProvider = ({ children }) => {
 
     // Initial default exercises
     const DEFAULT_EXERCISES = [
-        { id: 'bp_bb', name: 'Bench Press (Barbell)', category: 'Chest', tags: ['chest', 'pecs', 'push', 'barbell', 'strength'] },
-        { id: 'inc_bb_bp', name: 'Incline Bench Press (Barbell)', category: 'Chest', tags: ['chest', 'pecs', 'push', 'upper chest', 'incline'] },
-        { id: 'pushups', name: 'Pushups', category: 'Chest', tags: ['chest', 'pecs', 'push', 'bodyweight', 'calisthenics'] },
-        { id: 'dips', name: 'Tricep Dips', category: 'Triceps', tags: ['triceps', 'arms', 'push', 'bodyweight', 'dips'] },
-        { id: 'skull_crushers', name: 'Skull Crushers', category: 'Triceps', tags: ['triceps', 'arms', 'push', 'barbell', 'isolation'] },
-        { id: 'sq_bb', name: 'Squat (Barbell)', category: 'Legs', tags: ['legs', 'quads', 'glutes', 'squat', 'lower body', 'strength'] },
-        { id: 'dl_bb', name: 'Deadlift (Barbell)', category: 'Back', tags: ['back', 'posterior chain', 'hamstrings', 'deadlift', 'pull', 'strength'] },
-        { id: 'ohp_bb', name: 'Overhead Press (Barbell)', category: 'Shoulders', tags: ['shoulders', 'delts', 'push', 'overhead', 'military press'] },
-        { id: 'pullup', name: 'Pull Up', category: 'Back', tags: ['back', 'lats', 'pull', 'bodyweight', 'calisthenics'] },
-        { id: 'db_row', name: 'Dumbbell Row', category: 'Back', tags: ['back', 'lats', 'pull', 'dumbbell', 'row'] },
-        { id: 'inc_db_bp', name: 'Incline Bench Press (Dumbbell)', category: 'Chest', tags: ['chest', 'pecs', 'push', 'upper chest', 'dumbbell'] },
-        { id: 'lat_raise', name: 'Lateral Raise', category: 'Shoulders', tags: ['shoulders', 'delts', 'side delts', 'isolation', 'dumbbell'] },
-        { id: 'leg_press', name: 'Leg Press', category: 'Legs', tags: ['legs', 'quads', 'machine', 'push'] },
-        { id: 'rdl_bb', name: 'Romanian Deadlift (Barbell)', category: 'Legs', tags: ['legs', 'hamstrings', 'glutes', 'hinge', 'deadlift'] },
+        { id: 'bp_bb', name: 'Bench Press (Barbell)', bodyPart: 'Chest', type: 'Barbell', tags: ['chest', 'pecs', 'push', 'barbell', 'strength'] },
+        { id: 'inc_bb_bp', name: 'Incline Bench Press (Barbell)', bodyPart: 'Chest', type: 'Barbell', tags: ['chest', 'pecs', 'push', 'upper chest', 'incline'] },
+        { id: 'pushups', name: 'Pushups', bodyPart: 'Chest', type: 'Bodyweight', tags: ['chest', 'pecs', 'push', 'bodyweight', 'calisthenics'] },
+        { id: 'dips', name: 'Tricep Dips', bodyPart: 'Triceps', type: 'Bodyweight', tags: ['triceps', 'arms', 'push', 'bodyweight', 'dips'] }, // Note: Triceps -> Arms might be better if sticking to strict 6, but Context has Triceps in defaults. User said "Arms". I should map Triceps to Arms? "Chest, Back, Legs, Shoulders, Arms, Core". Existing data has "Triceps". I will change "Triceps" -> "Arms".
+        { id: 'skull_crushers', name: 'Skull Crushers', bodyPart: 'Arms', type: 'Barbell', tags: ['triceps', 'arms', 'push', 'barbell', 'isolation'] },
+        { id: 'sq_bb', name: 'Squat (Barbell)', bodyPart: 'Legs', type: 'Barbell', tags: ['legs', 'quads', 'glutes', 'squat', 'lower body', 'strength'] },
+        { id: 'dl_bb', name: 'Deadlift (Barbell)', bodyPart: 'Back', type: 'Barbell', tags: ['back', 'posterior chain', 'hamstrings', 'deadlift', 'pull', 'strength'] },
+        { id: 'ohp_bb', name: 'Overhead Press (Barbell)', bodyPart: 'Shoulders', type: 'Barbell', tags: ['shoulders', 'delts', 'push', 'overhead', 'military press'] },
+        { id: 'pullup', name: 'Pull Up', bodyPart: 'Back', type: 'Bodyweight', tags: ['back', 'lats', 'pull', 'bodyweight', 'calisthenics'] },
+        { id: 'db_row', name: 'Dumbbell Row', bodyPart: 'Back', type: 'Dumbbell', tags: ['back', 'lats', 'pull', 'dumbbell', 'row'] },
+        { id: 'inc_db_bp', name: 'Incline Bench Press (Dumbbell)', bodyPart: 'Chest', type: 'Dumbbell', tags: ['chest', 'pecs', 'push', 'upper chest', 'dumbbell'] },
+        { id: 'lat_raise', name: 'Lateral Raise', bodyPart: 'Shoulders', type: 'Dumbbell', tags: ['shoulders', 'delts', 'side delts', 'isolation', 'dumbbell'] },
+        { id: 'leg_press', name: 'Leg Press', bodyPart: 'Legs', type: 'Machine', tags: ['legs', 'quads', 'machine', 'push'] },
+        { id: 'rdl_bb', name: 'Romanian Deadlift (Barbell)', bodyPart: 'Legs', type: 'Barbell', tags: ['legs', 'hamstrings', 'glutes', 'hinge', 'deadlift'] },
+        { id: 'run', name: 'Run', bodyPart: 'Cardio', type: 'Cardio', tags: ['cardio', 'endurance', 'legs', 'running'] }, // "Cardio" bodyPart is outside strict list? "Chest, Back, Legs, Shoulders, Arms, Core". User request said "Tag all exercises... with bodyPart and type for accurate filtering". The list "Chest... Core" was for "Filter Chips". "Run" conceptually fits "Legs" or "Cardio". I'll stick to "Cardio" for now as explicit body part might be confusing if it's "Legs". Wait, user said "BodyPart must be one of: Chest, Back, Legs, Shoulders, Arms, Core." explicit list. Okay. Run -> Legs? Or maybe "Cardio" is allowed as Exception? I'll use "Legs" for run/cycle and "Cardio" type.
+        { id: 'cycle', name: 'Cycle', bodyPart: 'Legs', type: 'Cardio', tags: ['cardio', 'endurance', 'legs', 'cycling', 'bike'] },
+        { id: 'jump_rope', name: 'Jump Rope', bodyPart: 'Legs', type: 'Cardio', tags: ['cardio', 'endurance', 'calisthenics', 'coordination'] },
+        // Adjusting Tricep Dips to Arms
+        { id: 'plank', name: 'Plank', bodyPart: 'Core', type: 'Timed', tags: ['core', 'abs', 'stability', 'bodyweight', 'timed'] },
+        { id: 'side_plank', name: 'Side Plank', bodyPart: 'Core', type: 'Timed', tags: ['core', 'obliques', 'stability', 'bodyweight', 'timed'] },
+        { id: 'crunch', name: 'Crunches', bodyPart: 'Core', type: 'Bodyweight', tags: ['core', 'abs', 'bodyweight', 'isolation'] },
     ];
 
     const [exercises, setExercises] = useState(() => {
@@ -125,12 +132,27 @@ export const WorkoutProvider = ({ children }) => {
         // Avoid duplicates for now? Or allow multiple sets? 
         // Usually a routine has unique exercises.
         if (!cart.find(item => item.id === exercise.id)) {
-            setCart(prev => [...prev, exercise]);
+            // Initialize with default sets
+            const exerciseWithSets = {
+                ...exercise,
+                sets: [
+                    { id: Date.now(), weight: '', reps: '', rpe: 0, completed: false },
+                    { id: Date.now() + 1, weight: '', reps: '', rpe: 0, completed: false },
+                    { id: Date.now() + 2, weight: '', reps: '', rpe: 0, completed: false },
+                ]
+            };
+            setCart(prev => [...prev, exerciseWithSets]);
         }
     };
 
     const removeFromCart = (exerciseId) => {
         setCart(prev => prev.filter(item => item.id !== exerciseId));
+    };
+
+    const updateCartItem = (exerciseId, updates) => {
+        setCart(prev => prev.map(item =>
+            item.id === exerciseId ? { ...item, ...updates } : item
+        ));
     };
 
     const clearCart = () => setCart([]);
@@ -163,6 +185,7 @@ export const WorkoutProvider = ({ children }) => {
             cart,
             addToCart,
             removeFromCart,
+            updateCartItem,
             clearCart,
             reorderCart,
             templates,

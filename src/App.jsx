@@ -6,6 +6,7 @@ import ExerciseDirectory from './components/ExerciseDirectory';
 import CartDrawer from './components/shopping-cart/CartDrawer';
 import LoggerHub from './components/LoggerHub';
 import ActiveSession from './components/active-session/ActiveSession';
+import WorkoutSuccess from './components/active-session/WorkoutSuccess';
 import LibraryView from './components/library/LibraryView';
 import FolderDetailView from './components/library/FolderDetailView';
 import { WorkoutProvider, useWorkout } from './context/WorkoutContext';
@@ -25,13 +26,13 @@ const History = () => (
 const Logger = ({ openCart }) => {
   const [view, setView] = useState('hub'); // hub | directory | library | session | folder
   const [activeFolder, setActiveFolder] = useState(null);
+  const [directorySource, setDirectorySource] = useState('hub'); // 'hub' | 'session'
   const { routines, clearCart, addToCart } = useWorkout();
 
-  // Injection Logic
-  const handleStartTemplate = (template) => {
+  const handleFinishSession = (stats) => {
+    setSessionStats(stats);
     clearCart();
-    template.exercises.forEach(ex => addToCart(ex));
-    setView('session');
+    setView('success');
   };
 
   // Directory is now a sub-view invoked by Session or Build
@@ -39,7 +40,10 @@ const Logger = ({ openCart }) => {
     return (
       <div className="h-full flex flex-col animate-fade-in pb-20"> {/* Added pb-20 for tray space */}
         <div className="flex items-center gap-4 mb-4">
-          <button onClick={() => setView('session')} className="p-2 -ml-2 text-white/60 hover:text-white">
+          <button
+            onClick={() => setView(directorySource === 'session' ? 'session' : 'hub')}
+            className="p-2 -ml-2 text-white/60 hover:text-white"
+          >
             <ChevronLeft className="w-6 h-6" />
           </button>
           <h2 className="text-lg font-bold text-white">Select Exercise</h2>
@@ -78,7 +82,20 @@ const Logger = ({ openCart }) => {
     return (
       <ActiveSession
         onBack={() => setView('hub')}
-        onAddExercise={() => setView('directory')}
+        onAddExercise={() => {
+          setDirectorySource('session');
+          setView('directory');
+        }}
+        onFinishSession={handleFinishSession}
+      />
+    );
+  }
+
+  if (view === 'success' && sessionStats) {
+    return (
+      <WorkoutSuccess
+        stats={sessionStats}
+        onReturnHome={() => setView('hub')}
       />
     );
   }
@@ -87,10 +104,12 @@ const Logger = ({ openCart }) => {
     <LoggerHub
       onStartEmpty={() => {
         clearCart();
+        setDirectorySource('hub');
         setView('directory'); // Go straight to directory
       }}
       onBuildNew={() => {
         clearCart();
+        setDirectorySource('hub');
         setView('directory');
       }}
       onOpenLibrary={() => setView('library')}

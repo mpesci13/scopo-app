@@ -56,7 +56,7 @@ const Cart = () => {
 
                         <div className="flex-1">
                             <p className="font-medium text-sm">{item.name}</p>
-                            <p className="text-xs text-white/40">{item.category}</p>
+                            <p className="text-xs text-white/40">{item.bodyPart}</p>
                         </div>
 
                         <button
