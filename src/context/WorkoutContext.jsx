@@ -23,20 +23,20 @@ export const WorkoutProvider = ({ children }) => {
 
     // Initial default exercises
     const DEFAULT_EXERCISES = [
-        { id: 'bp_bb', name: 'Bench Press (Barbell)', category: 'Chest' },
-        { id: 'inc_bb_bp', name: 'Incline Bench Press (Barbell)', category: 'Chest' },
-        { id: 'pushups', name: 'Pushups', category: 'Chest' },
-        { id: 'dips', name: 'Tricep Dips', category: 'Triceps' },
-        { id: 'skull_crushers', name: 'Skull Crushers', category: 'Triceps' },
-        { id: 'sq_bb', name: 'Squat (Barbell)', category: 'Legs' },
-        { id: 'dl_bb', name: 'Deadlift (Barbell)', category: 'Back' },
-        { id: 'ohp_bb', name: 'Overhead Press (Barbell)', category: 'Shoulders' },
-        { id: 'pullup', name: 'Pull Up', category: 'Back' },
-        { id: 'db_row', name: 'Dumbbell Row', category: 'Back' },
-        { id: 'inc_db_bp', name: 'Incline Bench Press (Dumbbell)', category: 'Chest' },
-        { id: 'lat_raise', name: 'Lateral Raise', category: 'Shoulders' },
-        { id: 'leg_press', name: 'Leg Press', category: 'Legs' },
-        { id: 'rdl_bb', name: 'Romanian Deadlift (Barbell)', category: 'Legs' },
+        { id: 'bp_bb', name: 'Bench Press (Barbell)', category: 'Chest', tags: ['chest', 'pecs', 'push', 'barbell', 'strength'] },
+        { id: 'inc_bb_bp', name: 'Incline Bench Press (Barbell)', category: 'Chest', tags: ['chest', 'pecs', 'push', 'upper chest', 'incline'] },
+        { id: 'pushups', name: 'Pushups', category: 'Chest', tags: ['chest', 'pecs', 'push', 'bodyweight', 'calisthenics'] },
+        { id: 'dips', name: 'Tricep Dips', category: 'Triceps', tags: ['triceps', 'arms', 'push', 'bodyweight', 'dips'] },
+        { id: 'skull_crushers', name: 'Skull Crushers', category: 'Triceps', tags: ['triceps', 'arms', 'push', 'barbell', 'isolation'] },
+        { id: 'sq_bb', name: 'Squat (Barbell)', category: 'Legs', tags: ['legs', 'quads', 'glutes', 'squat', 'lower body', 'strength'] },
+        { id: 'dl_bb', name: 'Deadlift (Barbell)', category: 'Back', tags: ['back', 'posterior chain', 'hamstrings', 'deadlift', 'pull', 'strength'] },
+        { id: 'ohp_bb', name: 'Overhead Press (Barbell)', category: 'Shoulders', tags: ['shoulders', 'delts', 'push', 'overhead', 'military press'] },
+        { id: 'pullup', name: 'Pull Up', category: 'Back', tags: ['back', 'lats', 'pull', 'bodyweight', 'calisthenics'] },
+        { id: 'db_row', name: 'Dumbbell Row', category: 'Back', tags: ['back', 'lats', 'pull', 'dumbbell', 'row'] },
+        { id: 'inc_db_bp', name: 'Incline Bench Press (Dumbbell)', category: 'Chest', tags: ['chest', 'pecs', 'push', 'upper chest', 'dumbbell'] },
+        { id: 'lat_raise', name: 'Lateral Raise', category: 'Shoulders', tags: ['shoulders', 'delts', 'side delts', 'isolation', 'dumbbell'] },
+        { id: 'leg_press', name: 'Leg Press', category: 'Legs', tags: ['legs', 'quads', 'machine', 'push'] },
+        { id: 'rdl_bb', name: 'Romanian Deadlift (Barbell)', category: 'Legs', tags: ['legs', 'hamstrings', 'glutes', 'hinge', 'deadlift'] },
     ];
 
     const [exercises, setExercises] = useState(() => {

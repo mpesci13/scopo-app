@@ -22,7 +22,18 @@ const ActiveSession = ({ onBack, onAddExercise }) => {
     };
 
     // Global Expand/Collapse Logic
-    const [expandedIds, setExpandedIds] = useState(new Set());
+    const [expandedIds, setExpandedIds] = useState(() => new Set(cart.map(item => item.id)));
+
+    // Ensure new items are expanded when added (or when cart changes significantly if we wanted strict sync, but 'on mount' is key for the return trip from directory)
+    useEffect(() => {
+        // When coming back from directory with new items, we want them expanded.
+        // We can just merge all cart IDs into expandedIds to be safe.
+        setExpandedIds(prev => {
+            const next = new Set(prev);
+            cart.forEach(item => next.add(item.id));
+            return next;
+        });
+    }, [cart]);
 
     const toggleExpand = (id) => {
         const newSet = new Set(expandedIds);

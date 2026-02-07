@@ -9,8 +9,8 @@ const RPEBar = ({ value, onChange }) => {
                     key={level}
                     onClick={() => onChange(level)}
                     className={`flex-1 transition-all duration-300 ${level <= value
-                            ? 'bg-primary shadow-[0_0_10px_rgba(0,46,93,0.6)]'
-                            : 'hover:bg-white/10'
+                        ? 'bg-primary shadow-[0_0_10px_rgba(0,46,93,0.6)]'
+                        : 'hover:bg-white/10'
                         } ${level < 5 ? 'border-r border-black/20' : ''}`}
                 />
             ))}
@@ -134,6 +134,7 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove }) => {
 
                                 <input
                                     type="number"
+                                    inputMode="decimal"
                                     placeholder="0"
                                     value={set.weight}
                                     onChange={(e) => updateSet(set.id, 'weight', e.target.value)}
@@ -141,7 +142,8 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove }) => {
                                 />
 
                                 <input
-                                    type="text"
+                                    type="number"
+                                    inputMode="decimal"
                                     placeholder="0"
                                     value={set.reps}
                                     onChange={(e) => updateSet(set.id, 'reps', e.target.value)}
@@ -155,8 +157,8 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove }) => {
                                 <button
                                     onClick={() => toggleSetComplete(set.id)}
                                     className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all mx-auto ${set.completed
-                                            ? 'bg-primary text-white shadow-[0_0_10px_rgba(0,46,93,0.5)]'
-                                            : 'bg-white/5 text-transparent border border-white/10 hover:border-primary/50'
+                                        ? 'bg-primary text-white shadow-[0_0_10px_rgba(0,46,93,0.5)]'
+                                        : 'bg-white/5 text-transparent border border-white/10 hover:border-primary/50'
                                         }`}
                                 >
                                     <Check className="w-5 h-5" />

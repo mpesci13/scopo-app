@@ -1,3 +1,4 @@
-**Current Focus:** Phase 2 Complete (Logger Hub & Hierarchy).
-**Next Task:** Phase 3: "The Ghost Guide" & "One-Tap Swap".
-**Goal:** Build the active workout runtime experience.
+**Current Focus:** Phase 4 Complete (Playbook & Library).
+**Status:** GitHub remote fixed (mpesci13/scopo-app). Library data **Current Focus:** Phase 4d Complete (Floating Cart Upgrade).
+**Next Task:** Phase 5: "The After-Burn" (Progress & History).
+**Goal:** Visualize workout data and provide post-session analytics.

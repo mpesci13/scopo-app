@@ -37,7 +37,7 @@ const Logger = ({ openCart }) => {
   // Directory is now a sub-view invoked by Session or Build
   if (view === 'directory') {
     return (
-      <div className="h-full flex flex-col animate-fade-in">
+      <div className="h-full flex flex-col animate-fade-in pb-20"> {/* Added pb-20 for tray space */}
         <div className="flex items-center gap-4 mb-4">
           <button onClick={() => setView('session')} className="p-2 -ml-2 text-white/60 hover:text-white">
             <ChevronLeft className="w-6 h-6" />
@@ -45,7 +45,7 @@ const Logger = ({ openCart }) => {
           <h2 className="text-lg font-bold text-white">Select Exercise</h2>
         </div>
         <div className="flex-1 bg-white/5 rounded-xl border border-white/10 overflow-hidden flex flex-col">
-          <ExerciseDirectory />
+          <ExerciseDirectory onFinishSelection={() => setView('session')} />
         </div>
       </div>
     );
@@ -86,15 +86,10 @@ const Logger = ({ openCart }) => {
   return (
     <LoggerHub
       onStartEmpty={() => {
-        clearCart(); // Ensure fresh start
-        setView('session');
+        clearCart();
+        setView('directory'); // Go straight to directory
       }}
       onBuildNew={() => {
-        // Flow for building a new template: 
-        // We'll use the session view as the builder for now, but usually this would be separate.
-        // Or we can direct to Directory?
-        // Prompt: "Build New Template" -> "My Library" logic?
-        // Let's send to directory to add items to cart, effectively starting a session that can be saved.
         clearCart();
         setView('directory');
       }}
