@@ -58,7 +58,7 @@ const ActiveSession = ({ onBack, onAddExercise, onFinishSession }) => {
         cart.forEach(ex => {
             if (ex.sets) {
                 ex.sets.forEach(s => {
-                    if (!s.completed || !s.weight || !s.reps) {
+                    if (!s.completed) {
                         count++;
                     }
                 });
@@ -68,8 +68,21 @@ const ActiveSession = ({ onBack, onAddExercise, onFinishSession }) => {
     };
 
     const handleFinishClick = () => {
-        const incompleteCount = getIncompleteItems();
-        if (incompleteCount > 0) {
+        // 1. Check for ANY completed work
+        const hasCompletedSets = cart.some(ex =>
+            ex.sets && ex.sets.some(s => s.completed)
+        );
+
+        if (!hasCompletedSets) {
+            // Edge Case: User did nothing. Treat as Cancel check.
+            setShowZeroDataModal(true);
+            return;
+        }
+
+        // 2. Check for unfinished work (defined sets that are NOT completed)
+        const hasIncompleteItems = getIncompleteItems() > 0;
+
+        if (hasIncompleteItems) {
             setShowFinishModal(true);
         } else {
             finalizeWorkout();
@@ -77,10 +90,10 @@ const ActiveSession = ({ onBack, onAddExercise, onFinishSession }) => {
     };
 
     const finalizeWorkout = () => {
-        // Prune empty/unchecked sets
+        // Prune: Keep ONLY completed sets
         const prunedCart = cart.map(ex => ({
             ...ex,
-            sets: ex.sets ? ex.sets.filter(s => s.completed && s.weight && s.reps) : []
+            sets: ex.sets ? ex.sets.filter(s => s.completed) : []
         })).filter(ex => ex.sets.length > 0);
 
         // Calculate Stats
@@ -117,6 +130,7 @@ const ActiveSession = ({ onBack, onAddExercise, onFinishSession }) => {
     };
 
     const [showCancelModal, setShowCancelModal] = useState(false);
+    const [showZeroDataModal, setShowZeroDataModal] = useState(false);
 
     // Cancel Logic
     const handleCancelClick = () => {
@@ -222,7 +236,7 @@ const ActiveSession = ({ onBack, onAddExercise, onFinishSession }) => {
                 </div>
             </div>
 
-            {/* Finish Confirmation Modal - Fixed Centered */}
+            {/* Finish Confirmation Modal */}
             {showFinishModal && (
                 <div className="fixed inset-0 flex items-center justify-center z-[60] bg-black/80 backdrop-blur-sm animate-fade-in p-6">
                     <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl relative">
@@ -243,9 +257,38 @@ const ActiveSession = ({ onBack, onAddExercise, onFinishSession }) => {
                         <div className="flex gap-3 pt-4">
                             <button
                                 onClick={finalizeWorkout}
-                                className="flex-1 py-3 bg-primary hover:bg-primary/80 text-white rounded-xl font-bold transition-colors shadow-lg text-center"
+                                className="flex-1 py-3 bg-[#002E5D] hover:bg-[#002E5D]/80 text-white rounded-xl font-bold transition-colors shadow-lg text-center"
                             >
                                 Finish Anyway
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Zero Data Modal */}
+            {showZeroDataModal && (
+                <div className="fixed inset-0 flex items-center justify-center z-[60] bg-black/80 backdrop-blur-sm animate-fade-in p-6">
+                    <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl relative">
+                        <div className="flex items-center gap-3 text-white/60">
+                            <AlertTriangle className="w-6 h-6" />
+                            <h3 className="text-lg font-bold text-white">Empty Workout</h3>
+                        </div>
+                        <p className="text-white/60 text-sm leading-relaxed">
+                            No sets were completed. Do you want to cancel this workout?
+                        </p>
+                        <div className="flex gap-3 pt-4">
+                            <button
+                                onClick={() => setShowZeroDataModal(false)}
+                                className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-medium transition-colors"
+                            >
+                                Keep Training
+                            </button>
+                            <button
+                                onClick={confirmCancel}
+                                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-colors shadow-lg"
+                            >
+                                Cancel Workout
                             </button>
                         </div>
                     </div>

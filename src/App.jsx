@@ -27,6 +27,7 @@ const Logger = ({ openCart }) => {
   const [view, setView] = useState('hub'); // hub | directory | library | session | folder
   const [activeFolder, setActiveFolder] = useState(null);
   const [directorySource, setDirectorySource] = useState('hub'); // 'hub' | 'session'
+  const [sessionStats, setSessionStats] = useState(null);
   const { routines, clearCart, addToCart } = useWorkout();
 
   const handleFinishSession = (stats) => {
