@@ -9,6 +9,7 @@ import ActiveSession from './components/active-session/ActiveSession';
 import WorkoutSuccess from './components/active-session/WorkoutSuccess';
 import LibraryView from './components/library/LibraryView';
 import FolderDetailView from './components/library/FolderDetailView';
+import History from './components/History';
 import { WorkoutProvider, useWorkout } from './context/WorkoutContext';
 
 const Dashboard = () => (
@@ -17,23 +18,43 @@ const Dashboard = () => (
   </div>
 );
 
-const History = () => (
-  <div className="flex items-center justify-center h-64 text-white/40">
-    <p>History Coming Soon</p>
-  </div>
-);
 
-const Logger = ({ openCart }) => {
+
+const Logger = ({ openCart, onTabChange }) => {
   const [view, setView] = useState('hub'); // hub | directory | library | session | folder
   const [activeFolder, setActiveFolder] = useState(null);
   const [directorySource, setDirectorySource] = useState('hub'); // 'hub' | 'session'
   const [sessionStats, setSessionStats] = useState(null);
-  const { routines, clearCart, addToCart } = useWorkout();
+  const [completedSessionData, setCompletedSessionData] = useState(null);
+  const { routines, clearCart, completeWorkout } = useWorkout();
 
-  const handleFinishSession = (stats) => {
+  const handleFinishSession = (stats, data) => {
     setSessionStats(stats);
-    clearCart();
+    setCompletedSessionData(data);
     setView('success');
+  };
+
+  const handleCompleteLog = (rpe, notes) => {
+    console.log('handleCompleteLog called', { completedSessionData, sessionStats, rpe, notes });
+    if (completedSessionData && sessionStats) {
+      completeWorkout(completedSessionData, sessionStats, rpe, notes);
+    } else {
+      console.error('Missing session data in handleCompleteLog');
+    }
+    // Do NOT clear cart or set view here. Wait for modal exit.
+  };
+
+  const handleExitSuccess = (destination = 'hub') => {
+    clearCart();
+    setSessionStats(null);
+    setCompletedSessionData(null);
+    if (destination === 'history') {
+      onTabChange('history');
+      setView('hub'); // Reset view for next time
+    } else {
+      onTabChange('dashboard'); // User requested "Home Page" which is Dashboard tab
+      setView('hub');
+    }
   };
 
   // Directory is now a sub-view invoked by Session or Build
@@ -96,7 +117,9 @@ const Logger = ({ openCart }) => {
     return (
       <WorkoutSuccess
         stats={sessionStats}
-        onReturnHome={() => setView('hub')}
+        onCompleteLog={handleCompleteLog}
+        onClose={() => handleExitSuccess('hub')}
+        onViewHistory={() => handleExitSuccess('history')}
       />
     );
   }
@@ -126,7 +149,7 @@ function App() {
     <WorkoutProvider>
       <Layout activeTab={activeTab} onTabChange={setActiveTab}>
         {activeTab === 'dashboard' && <Dashboard />}
-        {activeTab === 'logger' && <Logger openCart={() => setIsCartOpen(true)} />}
+        {activeTab === 'logger' && <Logger openCart={() => setIsCartOpen(true)} onTabChange={setActiveTab} />}
         {activeTab === 'history' && <History />}
 
         <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />

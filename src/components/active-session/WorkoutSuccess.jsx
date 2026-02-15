@@ -1,15 +1,31 @@
 import React, { useState } from 'react';
 import { MessageSquare, Share } from 'lucide-react';
 
-const WorkoutSuccess = ({ stats, onReturnHome }) => {
+import CelebrationModal from './CelebrationModal';
+
+const WorkoutSuccess = ({ stats, onCompleteLog, onClose, onViewHistory }) => {
     const [rpe, setRpe] = useState(5);
     const [notes, setNotes] = useState('');
+    const [showCelebration, setShowCelebration] = useState(false);
+
+    const handleComplete = () => {
+        onCompleteLog(rpe, notes);
+        setShowCelebration(true);
+    };
 
     return (
         <div className="fixed inset-0 z-[100] bg-[#0a0a0a] flex flex-col overflow-y-auto">
+            {showCelebration && (
+                <CelebrationModal
+                    onClose={onClose}
+                    onViewHistory={onViewHistory}
+                />
+            )}
+
             {/* Ambient Glow */}
             <div className="fixed top-[-20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
 
+            {/* ... rest of the UI ... */}
             <div className="flex-1 flex flex-col items-center p-6 pb-4 animate-fade-in text-center max-w-md mx-auto w-full">
 
                 {/* Headline & Streak */}
@@ -89,10 +105,7 @@ const WorkoutSuccess = ({ stats, onReturnHome }) => {
             {/* INLINE Footer Action */}
             <div className="w-full pt-0 pb-40 space-y-3 relative z-10 flex flex-col items-center">
                 <button
-                    onClick={() => {
-                        // TODO: Save rpe/notes to history
-                        onReturnHome();
-                    }}
+                    onClick={handleComplete}
                     className="w-full max-w-[85%] py-4 bg-primary text-white rounded-full font-bold text-lg shadow-[0_4px_20px_rgba(0,46,93,0.5)] active:scale-95 transition-all outline-none"
                 >
                     Complete Log

@@ -106,6 +106,76 @@ export const WorkoutProvider = ({ children }) => {
         localStorage.setItem('scopo_routines_v2', JSON.stringify(routines));
     }, [routines]);
 
+    const [sessions, setSessions] = useState(() => {
+        const saved = localStorage.getItem('scopo_sessions');
+        return saved ? JSON.parse(saved) : [];
+    });
+
+    useEffect(() => {
+        localStorage.setItem('scopo_sessions', JSON.stringify(sessions));
+    }, [sessions]);
+
+    // ... (routines/templates code) ...
+
+    const completeWorkout = (workoutData, stats, sessionRpe, sessionNotes) => {
+        const sessionId = Date.now();
+        const date = new Date().toISOString();
+
+        // 1. Create Session Record
+        const newSession = {
+            id: sessionId,
+            date,
+            duration: stats.time,
+            volume: stats.volume,
+            totalSets: stats.sets,
+            rpe: sessionRpe,
+            notes: sessionNotes,
+            // Assuming we might name workouts later, for now 'Workout' or deriving from routine name?
+            // Since we don't have routine name here, we'll default.
+            name: "Workout",
+            exercises: workoutData
+        };
+
+        setSessions(prev => [newSession, ...prev]);
+
+        // 2. Flatten for "Logs" (Global Set History)
+        const newLogs = [];
+        const newExerciseNames = new Set();
+
+        workoutData.forEach(ex => {
+            newExerciseNames.add(ex.name);
+            ex.sets.forEach(s => {
+                newLogs.push({
+                    sessionId,
+                    exercise: ex.name,
+                    weight: s.weight,
+                    reps: s.reps,
+                    // Note: This is per-set RPE if we had it. 
+                    // Staging tray has 'rpe' field in sets? 
+                    // Yes: { id, weight, reps, rpe, completed }
+                    rpe: s.rpe || 0,
+                    completed: true,
+                    date
+                });
+            });
+        });
+
+        setLogs(prev => [...newLogs, ...prev]);
+
+        // 3. Update Unique Exercise History
+        setExerciseHistory(prev => {
+            const current = new Set(prev.map(e => e.toLowerCase()));
+            const toAdd = [];
+            newExerciseNames.forEach(name => {
+                if (!current.has(name.toLowerCase())) {
+                    toAdd.push(name);
+                }
+            });
+            if (toAdd.length === 0) return prev;
+            return [...prev, ...toAdd].sort();
+        });
+    };
+
     const addRoutine = (name) => {
         const newRoutine = { id: Date.now(), name, templates: [] };
         setRoutines(prev => [...prev, newRoutine]);
@@ -191,7 +261,9 @@ export const WorkoutProvider = ({ children }) => {
             templates,
             saveTemplate,
             routines,
-            addRoutine
+            addRoutine,
+            sessions,
+            completeWorkout
         }}>
             {children}
         </WorkoutContext.Provider>

@@ -106,27 +106,14 @@ const ActiveSession = ({ onBack, onAddExercise, onFinishSession }) => {
             });
         });
 
-        // Add to logs (using context)
-        prunedCart.forEach(ex => {
-            ex.sets.forEach(set => {
-                addLog({
-                    exercise: ex.name,
-                    weight: set.weight,
-                    reps: set.reps,
-                    rpe: set.rpe,
-                    date: new Date().toISOString()
-                });
-            });
-        });
-
         const stats = {
             time: formatTime(seconds),
             volume,
             sets: totalSets
         };
 
-        // Notify parent
-        onFinishSession(stats);
+        // Notify parent with stats AND data
+        onFinishSession(stats, prunedCart);
     };
 
     const [showCancelModal, setShowCancelModal] = useState(false);
