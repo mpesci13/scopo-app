@@ -12,14 +12,9 @@ import FolderDetailView from './components/library/FolderDetailView';
 import History from './components/History';
 import { WorkoutProvider, useWorkout } from './context/WorkoutContext';
 
-const Dashboard = () => (
-  <div className="flex items-center justify-center h-64 text-white/40">
-    <p>Dashboard Coming Soon</p>
-  </div>
-);
+import Dashboard from './components/Dashboard';
 
-
-
+// The old placeholder Dashboard component has been removed and replaced by the actual import.
 const Logger = ({ openCart, onTabChange }) => {
   const [view, setView] = useState('hub'); // hub | directory | library | session | folder
   const [activeFolder, setActiveFolder] = useState(null);
@@ -142,13 +137,13 @@ const Logger = ({ openCart, onTabChange }) => {
 };
 
 function App() {
-  const [activeTab, setActiveTab] = useState('logger'); // Default to Logger
+  const [activeTab, setActiveTab] = useState('dashboard'); // Default to Dashboard
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   return (
     <WorkoutProvider>
       <Layout activeTab={activeTab} onTabChange={setActiveTab}>
-        {activeTab === 'dashboard' && <Dashboard />}
+        {activeTab === 'dashboard' && <Dashboard onStartWorkout={() => setActiveTab('logger')} />}
         {activeTab === 'logger' && <Logger openCart={() => setIsCartOpen(true)} onTabChange={setActiveTab} />}
         {activeTab === 'history' && <History />}
 

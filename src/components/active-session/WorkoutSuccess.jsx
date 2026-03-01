@@ -37,10 +37,10 @@ const WorkoutSuccess = ({ stats, onCompleteLog, onClose, onViewHistory }) => {
 
                     <div className="transform -rotate-3 space-y-0">
                         <h1 className="text-5xl font-black text-white uppercase tracking-tighter italic leading-none">
-                            Ottimo
+                            Great
                         </h1>
                         <h1 className="text-6xl font-black text-primary uppercase tracking-tighter italic leading-none">
-                            Lavoro!
+                            Work!
                         </h1>
                     </div>
                 </div>
