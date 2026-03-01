@@ -246,6 +246,31 @@ export const WorkoutProvider = ({ children }) => {
         return newTemplate;
     };
 
+    // Ghost Data Groundwork
+    const getPreviousExerciseData = (exerciseName) => {
+        // Find the most recent session containing this exercise
+        const sortedSessions = [...sessions].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        for (const session of sortedSessions) {
+            const exercise = session.exercises.find(
+                ex => ex.name.toLowerCase() === exerciseName.toLowerCase()
+            );
+            if (exercise) {
+                // Return only completed sets
+                return {
+                    sessionId: session.id,
+                    date: session.date,
+                    sets: exercise.sets.filter(s => s.completed).map(s => ({
+                        weight: s.weight,
+                        reps: s.reps,
+                        rpe: s.rpe
+                    }))
+                };
+            }
+        }
+        return null; // No previous data found
+    };
+
     return (
         <WorkoutContext.Provider value={{
             logs,
@@ -263,7 +288,8 @@ export const WorkoutProvider = ({ children }) => {
             routines,
             addRoutine,
             sessions,
-            completeWorkout
+            completeWorkout,
+            getPreviousExerciseData // Added utility for Ghost guide
         }}>
             {children}
         </WorkoutContext.Provider>
