@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
-import { MessageSquare, Share } from 'lucide-react';
+import { MessageSquare, Share, Bookmark, Check } from 'lucide-react';
 
 import CelebrationModal from './CelebrationModal';
+import { useWorkout } from '../../context/WorkoutContext';
 
-const WorkoutSuccess = ({ stats, onCompleteLog, onClose, onViewHistory }) => {
+const WorkoutSuccess = ({ stats, onCompleteLog, onClose, onViewHistory, workoutData }) => {
+    const { saveSessionAsTemplate, routines } = useWorkout();
     const [rpe, setRpe] = useState(5);
     const [notes, setNotes] = useState('');
     const [showCelebration, setShowCelebration] = useState(false);
+    
+    // Template Saving State
+    const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+    const [templateName, setTemplateName] = useState('');
+    const [selectedRoutineId, setSelectedRoutineId] = useState(null);
+    const [templateSaved, setTemplateSaved] = useState(false);
 
     const handleComplete = () => {
         onCompleteLog(rpe, notes);
@@ -111,12 +119,92 @@ const WorkoutSuccess = ({ stats, onCompleteLog, onClose, onViewHistory }) => {
                     Complete Log
                 </button>
 
-                <button
-                    className="w-full max-w-[85%] py-4 bg-white/5 hover:bg-white/10 border border-white/5 text-white/40 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95 rounded-full"
-                >
-                    <Share className="w-4 h-4" />
-                    Share Workout
-                </button>
+                {/* Save Template Section */}
+                {isSavingTemplate && !templateSaved ? (
+                    <div className="w-full max-w-[90%] bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/10 rounded-3xl animate-fade-in shadow-[0_8px_30px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col p-4 space-y-4">
+                        <div className="flex items-center gap-2 bg-black/40 rounded-full p-1 border border-white/5">
+                            <input
+                                type="text"
+                                value={templateName}
+                                onChange={(e) => setTemplateName(e.target.value)}
+                                onBlur={(e) => {
+                                    setTimeout(() => {
+                                        if (!templateSaved) {
+                                            setIsSavingTemplate(false);
+                                            setTemplateName('');
+                                            setSelectedRoutineId(null);
+                                        }
+                                    }, 150);
+                                }}
+                                placeholder="Template Name..."
+                                className="flex-1 bg-transparent px-4 text-sm text-white placeholder:text-white/30 focus:outline-none"
+                                autoFocus
+                            />
+                            <button
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => {
+                                    if (templateName.trim()) {
+                                        saveSessionAsTemplate(templateName, workoutData, selectedRoutineId);
+                                        setTemplateSaved(true);
+                                    }
+                                }}
+                                className="p-3 bg-primary text-white rounded-full shrink-0 flex items-center justify-center active:scale-95 transition-transform"
+                            >
+                                <Check className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <div className="border-t border-white/5 pt-3">
+                            <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3 px-1 text-left">Save to Library Folder</h4>
+                            <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-1 px-1">
+                                {routines.map(routine => (
+                                    <button
+                                        key={routine.id}
+                                        onMouseDown={(e) => e.preventDefault()}
+                                        onClick={() => setSelectedRoutineId(routine.id)}
+                                        className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 whitespace-nowrap ${
+                                            selectedRoutineId === routine.id
+                                                ? 'bg-primary text-white shadow-[0_0_15px_rgba(0,46,93,0.5)]'
+                                                : 'bg-white/5 text-white/60 hover:bg-white/10'
+                                        }`}
+                                    >
+                                        {routine.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="w-full max-w-[85%] flex gap-3 mt-2">
+                        <button
+                            onClick={() => !templateSaved && setIsSavingTemplate(true)}
+                            className={`flex-1 py-3 border font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 rounded-full ${
+                                templateSaved 
+                                    ? 'bg-green-500/20 border-green-500/30 text-green-400' 
+                                    : 'bg-transparent hover:bg-white/5 border-transparent text-white/40 hover:text-white/60'
+                            }`}
+                        >
+                            {templateSaved ? (
+                                <>
+                                    <Check className="w-4 h-4" />
+                                    Saved
+                                </>
+                            ) : (
+                                <>
+                                    <Bookmark className="w-4 h-4" />
+                                    Save as Template
+                                </>
+                            )}
+                        </button>
+                        
+                        <button
+                            className="flex-1 py-3 bg-transparent hover:bg-white/5 border border-transparent text-white/40 hover:text-white/60 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors active:scale-95 rounded-full"
+                        >
+                            <Share className="w-4 h-4" />
+                            Share
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

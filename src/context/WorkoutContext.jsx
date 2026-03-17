@@ -271,6 +271,43 @@ export const WorkoutProvider = ({ children }) => {
         return null; // No previous data found
     };
 
+    // Save an existing session structure as a new template
+    const saveSessionAsTemplate = (name, sessionExercises, routineId = null) => {
+        if (!name.trim() || !sessionExercises || sessionExercises.length === 0) return;
+        
+        // Strip out specific weights/reps but keep the number of sets
+        const structuredExercises = sessionExercises.map(ex => ({
+            ...ex,
+            sets: ex.sets.map((_, i) => ({
+                id: Date.now() + i + Math.random(),
+                weight: '',
+                reps: '',
+                rpe: 0,
+                completed: false
+            }))
+        }));
+
+        const newTemplate = {
+            id: Date.now(),
+            name,
+            exercises: structuredExercises,
+            createdAt: new Date().toISOString()
+        };
+        
+        setTemplates(prev => [...prev, newTemplate]);
+
+        // If a specific folder/routine was selected, save it there too
+        if (routineId) {
+            setRoutines(prev => prev.map(routine => 
+                routine.id === routineId 
+                    ? { ...routine, templates: [...routine.templates, newTemplate] }
+                    : routine
+            ));
+        }
+
+        return newTemplate;
+    };
+
     return (
         <WorkoutContext.Provider value={{
             logs,
@@ -289,7 +326,8 @@ export const WorkoutProvider = ({ children }) => {
             addRoutine,
             sessions,
             completeWorkout,
-            getPreviousExerciseData // Added utility for Ghost guide
+            getPreviousExerciseData, // Added utility for Ghost guide
+            saveSessionAsTemplate
         }}>
             {children}
         </WorkoutContext.Provider>
