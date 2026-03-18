@@ -1,16 +1,126 @@
-import React, { useMemo, useState } from 'react';
-import { Clock, Dumbbell, Calendar, MessageSquare, ChevronRight, ChevronLeft, ArrowRight, Bookmark, Check } from 'lucide-react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Clock, Dumbbell, Calendar, MessageSquare, ChevronRight, ChevronLeft, ArrowRight, Bookmark, Check, Edit2, Save, X, Plus, Trash2 } from 'lucide-react';
 import { useWorkout } from '../context/WorkoutContext';
+import { useChallenge } from '../context/ChallengeContext';
 
 const History = () => {
-    const { sessions, saveSessionAsTemplate, routines } = useWorkout();
+    const { sessions, saveSessionAsTemplate, routines, updateSession } = useWorkout();
+    const { activeUserChallenges, currentUser, linkWorkoutToChallenge, unlinkWorkoutFromChallenge, updateChallengeWorkoutStats } = useChallenge();
     const [selectedSession, setSelectedSession] = useState(null);
+    
+    // Edit & Challenge State
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedSession, setEditedSession] = useState(null);
+    const [selectedChallengeIds, setSelectedChallengeIds] = useState([]);
     
     // Template Saving State
     const [isSavingTemplate, setIsSavingTemplate] = useState(false);
     const [templateName, setTemplateName] = useState('');
     const [selectedRoutineId, setSelectedRoutineId] = useState(null);
     const [templateSaved, setTemplateSaved] = useState(false);
+
+    // Initialize edit state when a session is selected or edit mode is toggled
+    useEffect(() => {
+        if (selectedSession && isEditing) {
+            // Clone the session to edit
+            setEditedSession(JSON.parse(JSON.stringify(selectedSession)));
+            
+            // Determine which challenges are currently linked
+            const initialLinkedIds = activeUserChallenges
+                .filter(c => c.participants.find(p => p.userId === currentUser.id)?.linkedWorkoutIds?.includes(selectedSession.id))
+                .map(c => c.id);
+            setSelectedChallengeIds(initialLinkedIds);
+        }
+    }, [selectedSession, isEditing, activeUserChallenges, currentUser.id]);
+
+    const handleSaveChanges = () => {
+        if (!editedSession) return;
+
+        // Recalculate volume and sets
+        let newVolume = 0;
+        let newTotalSets = 0;
+        
+        editedSession.exercises.forEach(ex => {
+            ex.sets.forEach(s => {
+                if (s.completed && s.weight && s.reps) {
+                    newVolume += (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0);
+                    newTotalSets++;
+                }
+            });
+        });
+
+        const newStats = { volume: newVolume, sets: newTotalSets, duration: editedSession.duration };
+        const oldStats = { volume: selectedSession.volume, sets: selectedSession.totalSets };
+
+        // Handle challenges
+        const originalLinkedIds = activeUserChallenges
+            .filter(c => c.participants.find(p => p.userId === currentUser.id)?.linkedWorkoutIds?.includes(selectedSession.id))
+            .map(c => c.id);
+
+        originalLinkedIds.forEach(id => {
+            if (!selectedChallengeIds.includes(id)) {
+                unlinkWorkoutFromChallenge(selectedSession.id, id, oldStats);
+            }
+        });
+
+        selectedChallengeIds.forEach(id => {
+            if (!originalLinkedIds.includes(id)) {
+                linkWorkoutToChallenge(selectedSession.id, id, editedSession.exercises, newStats);
+            }
+        });
+
+        selectedChallengeIds.forEach(id => {
+            if (originalLinkedIds.includes(id)) {
+                updateChallengeWorkoutStats(selectedSession.id, oldStats, newStats);
+            }
+        });
+
+        // Update global logs via WorkoutContext
+        updateSession(selectedSession.id, editedSession.exercises, newStats);
+
+        // Refresh UI state
+        setSelectedSession({ ...editedSession, volume: newVolume, totalSets: newTotalSets });
+        setIsEditing(false);
+    };
+
+    const handleSetEdit = (exerciseIndex, setIndex, field, value) => {
+        setEditedSession(prev => {
+            const next = { ...prev };
+            next.exercises[exerciseIndex].sets[setIndex] = {
+                ...next.exercises[exerciseIndex].sets[setIndex],
+                [field]: value
+            };
+            return next;
+        });
+    };
+
+    const handleAddSet = (exerciseIndex) => {
+        setEditedSession(prev => {
+            const next = { ...prev };
+            next.exercises[exerciseIndex].sets.push({
+                id: Date.now() + Math.random(),
+                weight: '',
+                reps: '',
+                rpe: 0,
+                completed: true // auto complete new sets
+            });
+            return next;
+        });
+    };
+
+    const handleRemoveSet = (exerciseIndex, setIndex) => {
+        setEditedSession(prev => {
+            const next = { ...prev };
+            next.exercises[exerciseIndex].sets.splice(setIndex, 1);
+            return next;
+        });
+    };
+
+    const toggleChallenge = (id) => {
+        setSelectedChallengeIds(prev => 
+            prev.includes(id) ? prev.filter(cId => cId !== id) : [...prev, id]
+        );
+    };
 
     // Sort sessions: Newest first
     const sortedSessions = useMemo(() => {
@@ -56,7 +166,17 @@ const History = () => {
                         <h2 className="text-lg font-bold text-white tracking-tight leading-none">Workout Details</h2>
                         <span className="text-xs text-white/40 font-mono uppercase tracking-wider">{formatDate(selectedSession.date)}</span>
                     </div>
-                    <div className="w-10" /> {/* Spacer */}
+                    <div className="w-10 flex justify-end">
+                        {!isEditing ? (
+                            <button onClick={() => setIsEditing(true)} className="p-2 text-white/60 hover:text-white transition-colors">
+                                <Edit2 className="w-5 h-5" />
+                            </button>
+                        ) : (
+                            <button onClick={() => setIsEditing(false)} className="p-2 text-red-500/80 hover:text-red-400 transition-colors">
+                                <X className="w-5 h-5" />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto px-4 py-6 space-y-8 pb-36">
@@ -114,7 +234,7 @@ const History = () => {
                         <h3 className="text-sm font-bold text-white/60 uppercase tracking-widest px-2">Exercises</h3>
 
                         <div className="space-y-3">
-                            {selectedSession.exercises.map((ex, idx) => (
+                            {(isEditing ? editedSession : selectedSession).exercises.map((ex, idx) => (
                                 <div key={ex.id || idx} className="bg-white/5 border border-white/10 rounded-2xl p-4">
                                     <div className="flex justify-between items-center mb-4">
                                         <h4 className="font-bold text-white text-lg">{ex.name}</h4>
@@ -127,7 +247,7 @@ const History = () => {
                                             <div className="text-center">Set</div>
                                             <div className="text-center">lbs</div>
                                             <div className="text-center">Reps</div>
-                                            <div className="text-center text-primary/60">RPE</div>
+                                            <div className="text-center text-primary/60">{isEditing ? 'Del' : 'RPE'}</div>
                                         </div>
 
                                         {/* Sets */}
@@ -137,22 +257,93 @@ const History = () => {
                                                 className={`grid grid-cols-4 gap-2 px-2 py-2 rounded-lg items-center ${set.completed ? 'bg-black/40 border border-white/5' : 'opacity-30'}`}
                                             >
                                                 <div className="text-center text-xs font-mono text-white/40">{sIdx + 1}</div>
-                                                <div className="text-center font-mono font-bold">{set.weight || '-'}</div>
-                                                <div className="text-center font-mono font-bold">{set.reps || '-'}</div>
-                                                <div className="text-center font-mono text-primary/80">{set.rpe || '-'}</div>
+                                                {isEditing ? (
+                                                    <>
+                                                        <div className="text-center">
+                                                            <input type="number" value={set.weight} onChange={(e) => handleSetEdit(idx, sIdx, 'weight', e.target.value)} className="w-full bg-transparent text-center font-mono font-bold text-white focus:outline-none border-b border-primary/50 py-1" />
+                                                        </div>
+                                                        <div className="text-center">
+                                                            <input type="number" value={set.reps} onChange={(e) => handleSetEdit(idx, sIdx, 'reps', e.target.value)} className="w-full bg-transparent text-center font-mono font-bold text-white focus:outline-none border-b border-primary/50 py-1" />
+                                                        </div>
+                                                        <div className="text-center flex justify-center items-center">
+                                                            <button onClick={() => handleRemoveSet(idx, sIdx)} className="text-red-500/60 hover:text-red-400 p-1"><Trash2 className="w-4 h-4" /></button>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div className="text-center font-mono font-bold">{set.weight || '-'}</div>
+                                                        <div className="text-center font-mono font-bold">{set.reps || '-'}</div>
+                                                        <div className="text-center font-mono text-primary/80">{set.rpe || '-'}</div>
+                                                    </>
+                                                )}
                                             </div>
                                         ))}
+
+                                        {isEditing && (
+                                            <button onClick={() => handleAddSet(idx)} className="mt-3 w-full py-2 border border-dashed border-white/20 rounded-xl text-xs font-bold text-white/40 hover:text-white/60 hover:border-white/40 transition-colors flex items-center justify-center gap-2">
+                                                <Plus className="w-3 h-3" /> Add Set
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
 
+                    {/* Challenge Links */}
+                    {activeUserChallenges.length > 0 && (
+                        <div className="space-y-4 pt-4 border-t border-white/10 mt-6">
+                            <h3 className="text-sm font-bold text-white/60 uppercase tracking-widest px-2">Challenge Links</h3>
+                            <div className="flex flex-col gap-3">
+                                {activeUserChallenges.map(challenge => {
+                                    const isSelected = selectedChallengeIds.includes(challenge.id);
+                                    if (!isEditing && !isSelected) return null; // In view mode, only show linked ones
+                                    
+                                    return (
+                                        <button
+                                            key={challenge.id}
+                                            onClick={() => isEditing && toggleChallenge(challenge.id)}
+                                            className={`p-4 rounded-2xl flex items-center justify-between transition-all border ${
+                                                isSelected 
+                                                ? 'bg-primary/20 border-primary/50 shadow-[0_0_20px_rgba(0,46,93,0.3)]' 
+                                                : 'bg-white/5 border-white/10'
+                                            } ${isEditing ? 'active:scale-[0.98] cursor-pointer hover:bg-white/10' : 'cursor-default'}`}
+                                        >
+                                            <div className="flex flex-col items-start">
+                                                <span className={`font-bold ${isSelected ? 'text-primary' : 'text-white'}`}>{challenge.title}</span>
+                                                <div className="text-xs text-white/40 font-mono mt-0.5">
+                                                    Goal: {challenge.goalType}
+                                                </div>
+                                            </div>
+                                            {isEditing && (
+                                                <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${
+                                                    isSelected ? 'bg-primary border-primary' : 'border-white/20'
+                                                }`}>
+                                                    {isSelected && <Check className="w-4 h-4 text-white" />}
+                                                </div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                                {!isEditing && activeUserChallenges.filter(c => selectedChallengeIds.includes(c.id)).length === 0 && (
+                                    <p className="text-xs text-white/40 px-2 italic">Not linked to any active challenges.</p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                 </div>
                 
                 {/* Fixed Action Footer */}
                 <div className="fixed bottom-20 left-0 right-0 p-6 z-30 flex justify-center pointer-events-none">
-                    {isSavingTemplate && !templateSaved ? (
+                    {isEditing ? (
+                        <button
+                            onClick={handleSaveChanges}
+                            className="w-full max-w-[320px] py-4 bg-primary text-white rounded-full font-bold text-lg shadow-[0_4px_20px_rgba(0,46,93,0.5)] active:scale-95 transition-all outline-none pointer-events-auto flex items-center justify-center gap-2"
+                        >
+                            <Save className="w-5 h-5" /> Save Changes
+                        </button>
+                    ) : isSavingTemplate && !templateSaved ? (
                         <div className="w-full max-w-[320px] bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/10 rounded-3xl animate-fade-in shadow-[0_8px_30px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col p-4 space-y-4 pointer-events-auto">
                             <div className="flex items-center gap-2 bg-black/40 rounded-full p-1 border border-white/5">
                                 <input
@@ -175,12 +366,13 @@ const History = () => {
                                 <button
                                     onMouseDown={(e) => e.preventDefault()}
                                     onClick={() => {
-                                        if (templateName.trim()) {
+                                        if (templateName.trim() && selectedRoutineId) {
                                             saveSessionAsTemplate(templateName, selectedSession.exercises, selectedRoutineId);
                                             setTemplateSaved(true);
                                         }
                                     }}
-                                    className="p-3 bg-primary text-white rounded-full shrink-0 flex items-center justify-center active:scale-95 transition-transform"
+                                    disabled={!templateName.trim() || !selectedRoutineId}
+                                    className="p-3 bg-primary text-white rounded-full shrink-0 flex items-center justify-center active:scale-95 transition-transform disabled:opacity-50 disabled:bg-primary/50"
                                 >
                                     <Check className="w-4 h-4" />
                                 </button>

@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { MessageSquare, Share, Bookmark, Check } from 'lucide-react';
+import { MessageSquare, Share, Bookmark, Check, AlertTriangle } from 'lucide-react';
 
 import CelebrationModal from './CelebrationModal';
 import { useWorkout } from '../../context/WorkoutContext';
+import { useChallenge } from '../../context/ChallengeContext';
 
 const WorkoutSuccess = ({ stats, onCompleteLog, onClose, onViewHistory, workoutData }) => {
     const { saveSessionAsTemplate, routines } = useWorkout();
+    const { activeUserChallenges } = useChallenge();
     const [rpe, setRpe] = useState(5);
     const [notes, setNotes] = useState('');
     const [showCelebration, setShowCelebration] = useState(false);
+    const [selectedChallengeIds, setSelectedChallengeIds] = useState([]);
     
     // Template Saving State
     const [isSavingTemplate, setIsSavingTemplate] = useState(false);
@@ -16,9 +19,23 @@ const WorkoutSuccess = ({ stats, onCompleteLog, onClose, onViewHistory, workoutD
     const [selectedRoutineId, setSelectedRoutineId] = useState(null);
     const [templateSaved, setTemplateSaved] = useState(false);
 
+    const isDuplicateName = () => {
+        if (!templateName.trim()) return false;
+        const nameToCheck = templateName.trim().toLowerCase();
+        return routines.some(routine => 
+            routine.templates && routine.templates.some(t => t.name.toLowerCase() === nameToCheck)
+        );
+    };
+
     const handleComplete = () => {
-        onCompleteLog(rpe, notes);
+        onCompleteLog(rpe, notes, selectedChallengeIds);
         setShowCelebration(true);
+    };
+
+    const toggleChallenge = (id) => {
+        setSelectedChallengeIds(prev => 
+            prev.includes(id) ? prev.filter(cId => cId !== id) : [...prev, id]
+        );
     };
 
     return (
@@ -108,6 +125,39 @@ const WorkoutSuccess = ({ stats, onCompleteLog, onClose, onViewHistory, workoutD
                         />
                     </div>
                 </div>
+
+                {/* Challenge Contribution */}
+                {activeUserChallenges.length > 0 && (
+                    <div className="w-full mt-8 space-y-4">
+                        <h3 className="text-sm font-bold text-white/60 uppercase tracking-widest text-left px-2">Challenge Contribution</h3>
+                        <div className="flex flex-col gap-3">
+                            {activeUserChallenges.map(challenge => {
+                                const isSelected = selectedChallengeIds.includes(challenge.id);
+                                return (
+                                    <button
+                                        key={challenge.id}
+                                        onClick={() => toggleChallenge(challenge.id)}
+                                        className={`p-4 rounded-2xl flex items-center justify-between transition-all active:scale-[0.98] border ${
+                                            isSelected 
+                                            ? 'bg-primary/20 border-primary/50 shadow-[0_0_20px_rgba(0,46,93,0.3)]' 
+                                            : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                        }`}
+                                    >
+                                        <div className="flex flex-col items-start">
+                                            <span className={`font-bold ${isSelected ? 'text-primary' : 'text-white'}`}>{challenge.title}</span>
+                                            <span className="text-xs text-white/40 font-mono">Link to {challenge.goalType} goal</span>
+                                        </div>
+                                        <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${
+                                            isSelected ? 'bg-primary border-primary' : 'border-white/20'
+                                        }`}>
+                                            {isSelected && <Check className="w-4 h-4 text-white" />}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* INLINE Footer Action */}
@@ -122,36 +172,45 @@ const WorkoutSuccess = ({ stats, onCompleteLog, onClose, onViewHistory, workoutD
                 {/* Save Template Section */}
                 {isSavingTemplate && !templateSaved ? (
                     <div className="w-full max-w-[90%] bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/10 rounded-3xl animate-fade-in shadow-[0_8px_30px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col p-4 space-y-4">
-                        <div className="flex items-center gap-2 bg-black/40 rounded-full p-1 border border-white/5">
-                            <input
-                                type="text"
-                                value={templateName}
-                                onChange={(e) => setTemplateName(e.target.value)}
-                                onBlur={(e) => {
-                                    setTimeout(() => {
-                                        if (!templateSaved) {
-                                            setIsSavingTemplate(false);
-                                            setTemplateName('');
-                                            setSelectedRoutineId(null);
+                        <div className="flex flex-col gap-2 relative">
+                            <div className={`flex items-center gap-2 bg-black/40 rounded-full p-1 border transition-colors ${isDuplicateName() ? 'border-red-500/50' : 'border-white/5'}`}>
+                                <input
+                                    type="text"
+                                    value={templateName}
+                                    onChange={(e) => setTemplateName(e.target.value)}
+                                    onBlur={(e) => {
+                                        setTimeout(() => {
+                                            if (!templateSaved) {
+                                                setIsSavingTemplate(false);
+                                                setTemplateName('');
+                                                setSelectedRoutineId(null);
+                                            }
+                                        }, 150);
+                                    }}
+                                    placeholder="Template Name..."
+                                    className={`flex-1 bg-transparent px-4 text-sm focus:outline-none transition-colors ${isDuplicateName() ? 'text-red-400' : 'text-white placeholder:text-white/30'}`}
+                                    autoFocus
+                                />
+                                <button
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => {
+                                        if (templateName.trim() && !isDuplicateName()) {
+                                            saveSessionAsTemplate(templateName, workoutData, selectedRoutineId);
+                                            setTemplateSaved(true);
                                         }
-                                    }, 150);
-                                }}
-                                placeholder="Template Name..."
-                                className="flex-1 bg-transparent px-4 text-sm text-white placeholder:text-white/30 focus:outline-none"
-                                autoFocus
-                            />
-                            <button
-                                onMouseDown={(e) => e.preventDefault()}
-                                onClick={() => {
-                                    if (templateName.trim()) {
-                                        saveSessionAsTemplate(templateName, workoutData, selectedRoutineId);
-                                        setTemplateSaved(true);
-                                    }
-                                }}
-                                className="p-3 bg-primary text-white rounded-full shrink-0 flex items-center justify-center active:scale-95 transition-transform"
-                            >
-                                <Check className="w-4 h-4" />
-                            </button>
+                                    }}
+                                    disabled={!templateName.trim() || isDuplicateName()}
+                                    className="p-3 bg-primary text-white rounded-full shrink-0 flex items-center justify-center active:scale-95 transition-all disabled:opacity-50 disabled:bg-white/10 disabled:text-white/40"
+                                >
+                                    <Check className="w-4 h-4" />
+                                </button>
+                            </div>
+                            {isDuplicateName() && (
+                                <p className="text-red-500 text-xs font-medium px-4 flex items-center gap-1">
+                                    <AlertTriangle className="w-3 h-3" />
+                                    Template name already exists.
+                                </p>
+                            )}
                         </div>
 
                         <div className="border-t border-white/5 pt-3">

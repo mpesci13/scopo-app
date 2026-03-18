@@ -174,6 +174,54 @@ export const WorkoutProvider = ({ children }) => {
             if (toAdd.length === 0) return prev;
             return [...prev, ...toAdd].sort();
         });
+
+        // Return the final session so it can be linked to external states (like challenges)
+        return newSession;
+    };
+
+    const updateSession = (sessionId, updatedExercises, updatedStats) => {
+        // Find existing date to preserve chronological order
+        const existingSession = sessions.find(s => s.id === sessionId);
+        const sessionDate = existingSession ? existingSession.date : new Date().toISOString();
+
+        // 1. Update the session record
+        setSessions(prev => prev.map(session => {
+            if (session.id === sessionId) {
+                return {
+                    ...session,
+                    ...updatedStats, // volume, totalSets, duration, etc.
+                    exercises: updatedExercises
+                };
+            }
+            return session;
+        }));
+
+        // 2. Rebuild the logs for this session
+        setLogs(prev => {
+            // Remove old logs for this session
+            const filteredLogs = prev.filter(log => log.sessionId !== sessionId);
+            
+            // Generate new logs
+            const newLogs = [];
+            
+            updatedExercises.forEach(ex => {
+                ex.sets.forEach(s => {
+                    newLogs.push({
+                        sessionId,
+                        exercise: ex.name,
+                        weight: s.weight,
+                        reps: s.reps,
+                        rpe: s.rpe || 0,
+                        completed: s.completed ?? true,
+                        date: sessionDate
+                    });
+                });
+            });
+
+            // Sort global logs descending by date
+            const combined = [...newLogs, ...filteredLogs];
+            return combined.sort((a, b) => new Date(b.date) - new Date(a.date));
+        });
     };
 
     const addRoutine = (name) => {
@@ -215,6 +263,33 @@ export const WorkoutProvider = ({ children }) => {
         }
     };
 
+    const loadTemplate = (exercisesArray) => {
+        // Ensure all loaded templates have initialized sets arrays
+        const loadedCart = exercisesArray.map(ex => {
+            if (!ex.sets || ex.sets.length === 0) {
+                return {
+                    ...ex,
+                    sets: [
+                        { id: Date.now() + Math.random(), weight: '', reps: '', rpe: 0, completed: false },
+                        { id: Date.now() + 1 + Math.random(), weight: '', reps: '', rpe: 0, completed: false },
+                        { id: Date.now() + 2 + Math.random(), weight: '', reps: '', rpe: 0, completed: false }
+                    ]
+                };
+            }
+            // If they already have structured sets, generate new IDs so they don't clash
+            return {
+                ...ex,
+                id: ex.id + '_' + Date.now(), // Ensure exercise instance ID is unique for cart
+                sets: ex.sets.map(s => ({
+                    ...s,
+                    id: Date.now() + Math.random()
+                }))
+            };
+        });
+        
+        setCart(loadedCart);
+    };
+
     const removeFromCart = (exerciseId) => {
         setCart(prev => prev.filter(item => item.id !== exerciseId));
     };
@@ -234,7 +309,35 @@ export const WorkoutProvider = ({ children }) => {
         setCart(newCart);
     };
 
-    const saveTemplate = (name) => {
+    const deleteTemplate = (routineId, templateId) => {
+        setRoutines(prev => prev.map(routine => {
+            if (routine.id === routineId) {
+                return {
+                    ...routine,
+                    templates: routine.templates.filter(t => t.id !== templateId)
+                };
+            }
+            return routine;
+        }));
+    };
+
+    const updateTemplateLastUsed = (routineId, templateId) => {
+        setRoutines(prev => prev.map(routine => {
+            if (routine.id === routineId) {
+                return {
+                    ...routine,
+                    templates: routine.templates.map(t => 
+                        t.id === templateId 
+                            ? { ...t, lastUsed: new Date().toISOString() } 
+                            : t
+                    )
+                };
+            }
+            return routine;
+        }));
+    };
+
+    const saveTemplate = (name, routineId = null) => {
         if (!name.trim() || cart.length === 0) return;
         const newTemplate = {
             id: Date.now(),
@@ -243,6 +346,16 @@ export const WorkoutProvider = ({ children }) => {
             createdAt: new Date().toISOString()
         };
         setTemplates(prev => [...prev, newTemplate]);
+        
+        // If a specific folder/routine was selected, save it there too
+        if (routineId) {
+            setRoutines(prev => prev.map(routine => 
+                routine.id === routineId 
+                    ? { ...routine, templates: [...routine.templates, newTemplate] }
+                    : routine
+            ));
+        }
+
         return newTemplate;
     };
 
@@ -316,16 +429,20 @@ export const WorkoutProvider = ({ children }) => {
             exercises,
             cart,
             addToCart,
+            loadTemplate,
             removeFromCart,
             updateCartItem,
             clearCart,
             reorderCart,
             templates,
+            deleteTemplate,
+            updateTemplateLastUsed,
             saveTemplate,
             routines,
             addRoutine,
             sessions,
             completeWorkout,
+            updateSession,
             getPreviousExerciseData, // Added utility for Ghost guide
             saveSessionAsTemplate
         }}>

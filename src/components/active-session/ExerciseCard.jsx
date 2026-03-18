@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { ChevronDown, Check, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, Check, Plus, Trash2, ArrowDown, Copy, X } from 'lucide-react';
 
 const RPEBar = ({ value, onChange }) => {
     return (
@@ -109,7 +109,8 @@ const SwipeableSetRow = ({ children, onDelete }) => {
     );
 };
 
-const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdateSets }) => {
+const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdateSets, isBuilderMode = false }) => {
+    const [isEditingSetCount, setIsEditingSetCount] = useState(false);
     // Sets are now passed in via exercise.sets
     const sets = exercise.sets || [];
 
@@ -129,9 +130,9 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
     const addSet = () => {
         const lastSet = sets[sets.length - 1];
         const newSet = {
-            id: Date.now(),
-            weight: lastSet ? lastSet.weight : '',
-            reps: lastSet ? lastSet.reps : '',
+            id: Date.now() + Math.random(),
+            weight: isBuilderMode ? '' : (lastSet ? lastSet.weight : ''),
+            reps: isBuilderMode ? '' : (lastSet ? lastSet.reps : ''),
             rpe: 0,
             completed: false
         };
@@ -139,7 +140,62 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
     };
 
     const removeSet = (id) => {
-        onUpdateSets(sets.filter(s => s.id !== id));
+        if (sets.length === 1) {
+            // If it's the very last set, just clear its data instead of removing it entirely
+            onUpdateSets([{
+                ...sets[0],
+                weight: '',
+                reps: '',
+                rpe: 0,
+                completed: false
+            }]);
+        } else {
+            onUpdateSets(sets.filter(s => s.id !== id));
+        }
+    };
+
+    const copySetRow = (index) => {
+        const sourceSet = sets[index];
+        const newSets = [...sets];
+        
+        // Find the first completely empty row
+        const firstEmptyIndex = newSets.findIndex(s => s.weight === '' && s.reps === '');
+        
+        if (firstEmptyIndex !== -1) {
+            newSets[firstEmptyIndex] = {
+                ...newSets[firstEmptyIndex],
+                weight: sourceSet.weight,
+                reps: sourceSet.reps
+            };
+        } else {
+            newSets.push({
+                id: Date.now() + Math.random(),
+                weight: sourceSet.weight,
+                reps: sourceSet.reps,
+                rpe: 0,
+                completed: false
+            });
+        }
+        onUpdateSets(newSets);
+    };
+
+    const adjustSetCount = (count) => {
+        if (count < 1 || count > 10) return;
+        const newSets = [];
+        for (let i = 0; i < count; i++) {
+            if (i < sets.length) {
+                newSets.push(sets[i]);
+            } else {
+                newSets.push({
+                    id: Date.now() + i + Math.random(),
+                    weight: '',
+                    reps: '',
+                    rpe: 0,
+                    completed: false
+                });
+            }
+        }
+        onUpdateSets(newSets);
     };
 
     return (
@@ -150,7 +206,38 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
                 className="flex items-center justify-between p-4 cursor-pointer hover:bg-white/5 transition-colors"
             >
                 <div className="flex items-center gap-4">
-                    <ProgressCircle total={sets.length} completed={completedSets} />
+                    {isBuilderMode ? (
+                        <div 
+                            className="w-12 h-12 flex items-center justify-center bg-white/5 rounded-full border border-white/10 shrink-0 cursor-pointer hover:border-primary/50 transition-colors"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsEditingSetCount(true);
+                            }}
+                        >
+                            {isEditingSetCount ? (
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="10"
+                                    autoFocus
+                                    className="w-full text-center bg-transparent text-white font-bold outline-none appearance-none"
+                                    onBlur={(e) => {
+                                        setIsEditingSetCount(false);
+                                        const count = parseInt(e.target.value);
+                                        if (!isNaN(count)) adjustSetCount(count);
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') e.target.blur();
+                                    }}
+                                    defaultValue={sets.length}
+                                />
+                            ) : (
+                                <span className="text-[10px] font-bold text-white uppercase text-center leading-none">{sets.length}<br/>Set{sets.length !== 1 ? 's' : ''}</span>
+                            )}
+                        </div>
+                    ) : (
+                        <ProgressCircle total={sets.length} completed={completedSets} />
+                    )}
                     <div>
                         <h3 className="text-lg font-bold text-white leading-tight">{exercise.name}</h3>
                         <p className="text-xs text-white/40 pt-1">Target: {exercise.bodyPart}</p>
@@ -172,19 +259,20 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
             {isExpanded && (
                 <div className="p-4 pt-0 space-y-4 animate-fade-in">
                     {/* Column Headers */}
-                    <div className="grid grid-cols-[2rem_1fr_1fr_1fr_2rem] gap-2 px-0 text-[10px] uppercase tracking-wider text-white/30 font-semibold items-center text-center">
+                    <div className={`gap-2 px-0 text-[10px] uppercase tracking-wider text-white/30 font-semibold items-center text-center ${isBuilderMode ? 'grid grid-cols-[2rem_1fr_1fr_4rem]' : 'grid grid-cols-[2rem_1fr_1fr_1fr_2rem]'}`}>
                         <div className="text-left pl-2">Set</div>
                         <div>lbs</div>
                         <div>Reps</div>
-                        <div>RPE</div>
-                        <div>Done</div>
+                        {!isBuilderMode && <div>RPE</div>}
+                        {!isBuilderMode && <div>Done</div>}
+                        {isBuilderMode && <div className="text-right pr-2">Actions</div>}
                     </div>
 
                     {/* Sets */}
                     <div className="space-y-3">
                         {sets.map((set, index) => (
                             <SwipeableSetRow key={set.id} onDelete={() => removeSet(set.id)}>
-                                <div key={set.id} className="grid grid-cols-[2rem_1fr_1fr_1fr_2rem] gap-2 items-center w-full bg-[#111] pr-1">
+                                <div key={set.id} className={`gap-2 items-center w-full bg-[#111] pr-1 ${isBuilderMode ? 'grid grid-cols-[2rem_1fr_1fr_4rem]' : 'grid grid-cols-[2rem_1fr_1fr_1fr_2rem]'}`}>
                                     <span className="text-sm font-bold text-white/40 flex justify-center">{index + 1}</span>
 
                                     <input
@@ -205,19 +293,42 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
                                         className="w-full bg-white/5 border border-white/10 rounded-lg py-2 text-center text-white font-medium focus:border-primary focus:outline-none transition-colors placeholder:text-white/10 p-0"
                                     />
 
-                                    <div className="flex items-center justify-center">
-                                        <RPEBar value={set.rpe} onChange={(val) => updateSet(set.id, 'rpe', val)} />
-                                    </div>
+                                    {!isBuilderMode && (
+                                        <div className="flex items-center justify-center">
+                                            <RPEBar value={set.rpe} onChange={(val) => updateSet(set.id, 'rpe', val)} />
+                                        </div>
+                                    )}
 
-                                    <button
-                                        onClick={() => toggleSetComplete(set.id)}
-                                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all mx-auto ${set.completed
-                                            ? 'bg-primary text-white shadow-[0_0_10px_rgba(0,46,93,0.5)]'
-                                            : 'bg-white/5 text-transparent border border-white/10 hover:border-primary/50'
-                                            }`}
-                                    >
-                                        <Check className="w-5 h-5" />
-                                    </button>
+                                    {!isBuilderMode && (
+                                        <button
+                                            onClick={() => toggleSetComplete(set.id)}
+                                            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all mx-auto ${set.completed
+                                                ? 'bg-primary text-white shadow-[0_0_10px_rgba(0,46,93,0.5)]'
+                                                : 'bg-white/5 text-transparent border border-white/10 hover:border-primary/50'
+                                                }`}
+                                        >
+                                            <Check className="w-5 h-5" />
+                                        </button>
+                                    )}
+
+                                    {isBuilderMode && (
+                                        <div className="flex items-center justify-end gap-1 w-full pl-1">
+                                            <button
+                                                title="Duplicate Row"
+                                                onClick={() => copySetRow(index)}
+                                                className="w-7 h-7 rounded-md flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+                                            >
+                                                <Copy className="w-3.5 h-3.5" />
+                                            </button>
+                                            <button
+                                                title="Delete Row"
+                                                onClick={() => removeSet(set.id)}
+                                                className="w-7 h-7 rounded-md flex items-center justify-center text-white/40 hover:text-red-400 hover:bg-red-400/10 active:scale-95 transition-all"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </SwipeableSetRow>
                         ))}

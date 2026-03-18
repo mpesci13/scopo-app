@@ -74,7 +74,7 @@ const SortableItem = ({ item, onRemove }) => {
     );
 };
 
-const StagingTray = ({ onStartWorkout }) => {
+const StagingTray = ({ onStartWorkout, isBuilderMode = false }) => {
     const { cart, removeFromCart, reorderCart } = useWorkout();
     const [isOpen, setIsOpen] = useState(false);
 
@@ -153,7 +153,6 @@ const StagingTray = ({ onStartWorkout }) => {
                             </DndContext>
                         </div>
 
-                        {/* Action Button */}
                         <button
                             onClick={() => {
                                 setIsOpen(false);
@@ -161,7 +160,7 @@ const StagingTray = ({ onStartWorkout }) => {
                             }}
                             className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-[0_4px_20px_rgba(0,46,93,0.4)] active:scale-95 transition-all text-base"
                         >
-                            Start Workout
+                            {isBuilderMode ? 'Customize Template' : 'Start Workout'}
                         </button>
                     </div>
                 </div>
@@ -177,7 +176,9 @@ const StagingTray = ({ onStartWorkout }) => {
                         <span className="font-bold text-white text-lg">
                             {cart.length} {cart.length === 1 ? 'Exercise' : 'Exercises'}
                         </span>
-                        <span className="text-xs text-white/60">Tap to review & start</span>
+                        <span className="text-xs text-white/60">
+                            {isBuilderMode ? 'Tap to review / build' : 'Tap to review & start'}
+                        </span>
                     </div>
 
                     <div className="flex items-center gap-2 text-white/80 bg-white/10 px-3 py-1.5 rounded-lg">

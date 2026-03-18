@@ -84,7 +84,7 @@ const FilterDropdown = ({ label, options, selected, onSelect, onClear }) => {
     );
 };
 
-const ExerciseDirectory = ({ onFinishSelection }) => {
+const ExerciseDirectory = ({ onFinishSelection, isBuilderMode = false }) => {
     const { exercises, addToCart, removeFromCart, cart } = useWorkout();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedBodyPart, setSelectedBodyPart] = useState(null);
@@ -237,7 +237,7 @@ const ExerciseDirectory = ({ onFinishSelection }) => {
             </div>
 
             {/* Staging Tray */}
-            <StagingTray onStartWorkout={onFinishSelection} />
+            <StagingTray onStartWorkout={onFinishSelection} isBuilderMode={isBuilderMode} />
         </div>
     );
 };

@@ -177,11 +177,14 @@ const ActiveSession = ({ onBack, onAddExercise, onFinishSession }) => {
             {/* Content */}
             <div className="flex-1 overflow-y-auto space-y-4 p-4 pb-48 touch-pan-y">
                 {cart.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-                        <div className="p-4 bg-white/5 rounded-full">
-                            <Plus className="w-8 h-8 text-white/20" />
-                        </div>
-                        <p className="text-white/40">Tap '+ Add Exercise' below to start.</p>
+                    <div className="flex flex-col items-center justify-center py-32 text-center space-y-6">
+                        <button 
+                            onClick={onAddExercise} 
+                            className="p-8 bg-white/5 hover:bg-white/10 rounded-full transition-all active:scale-95 border border-white/10"
+                        >
+                            <Plus className="w-16 h-16 text-white/40" />
+                        </button>
+                        <p className="text-white/40 font-medium">Tap to add your first exercise.</p>
                     </div>
                 ) : (
                     cart.map(exercise => (
@@ -198,27 +201,31 @@ const ActiveSession = ({ onBack, onAddExercise, onFinishSession }) => {
 
                 {/* Inline Footer Actions */}
                 <div className="mt-8 flex flex-col gap-3">
-                    <button
-                        onClick={onAddExercise}
-                        className="w-full py-4 bg-white/5 border border-white/10 text-white font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all"
-                    >
-                        <Plus className="w-5 h-5" />
-                        Add Exercise
-                    </button>
+                    {cart.length > 0 && (
+                        <button
+                            onClick={onAddExercise}
+                            className="w-full py-4 bg-white/5 border border-white/10 text-white font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all"
+                        >
+                            <Plus className="w-5 h-5" />
+                            Add Exercise
+                        </button>
+                    )}
 
-                    <div className="grid grid-cols-[1fr_2fr] gap-3">
+                    <div className={cart.length > 0 ? "grid grid-cols-[1fr_2fr] gap-3" : "flex"}>
                         <button
                             onClick={handleCancelClick}
-                            className="py-4 border border-red-500/20 text-red-400 font-bold rounded-2xl text-sm transition-colors hover:bg-red-500/10"
+                            className={`py-4 border border-red-500/20 text-red-400 font-bold rounded-2xl text-sm transition-colors hover:bg-red-500/10 ${cart.length === 0 ? 'w-full' : ''}`}
                         >
-                            Cancel
+                            Cancel Workout
                         </button>
-                        <button
-                            onClick={handleFinishClick}
-                            className="py-4 bg-[#002E5D] text-white font-bold rounded-2xl text-sm uppercase tracking-wide shadow-lg active:scale-95 transition-all"
-                        >
-                            Finish Workout
-                        </button>
+                        {cart.length > 0 && (
+                            <button
+                                onClick={handleFinishClick}
+                                className="py-4 bg-[#002E5D] text-white font-bold rounded-2xl text-sm uppercase tracking-wide shadow-lg active:scale-95 transition-all"
+                            >
+                                Finish Workout
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

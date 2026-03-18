@@ -9,8 +9,10 @@ import ActiveSession from './components/active-session/ActiveSession';
 import WorkoutSuccess from './components/active-session/WorkoutSuccess';
 import LibraryView from './components/library/LibraryView';
 import FolderDetailView from './components/library/FolderDetailView';
+import TemplateBuilder from './components/library/TemplateBuilder';
 import History from './components/History';
 import { WorkoutProvider, useWorkout } from './context/WorkoutContext';
+import { ChallengeProvider, useChallenge } from './context/ChallengeContext';
 
 import Dashboard from './components/Dashboard';
 
@@ -19,9 +21,18 @@ const Logger = ({ openCart, onTabChange }) => {
   const [view, setView] = useState('hub'); // hub | directory | library | session | folder
   const [activeFolder, setActiveFolder] = useState(null);
   const [directorySource, setDirectorySource] = useState('hub'); // 'hub' | 'session'
+  const [sessionSource, setSessionSource] = useState('hub'); // 'hub' | 'folder'
   const [sessionStats, setSessionStats] = useState(null);
   const [completedSessionData, setCompletedSessionData] = useState(null);
-  const { routines, clearCart, completeWorkout } = useWorkout();
+  const { routines, clearCart, completeWorkout, addToCart, loadTemplate } = useWorkout();
+  const { linkWorkoutToChallenge } = useChallenge();
+
+  const handleStartTemplate = (template) => {
+    loadTemplate(template.exercises);
+    setDirectorySource('session');
+    setSessionSource('folder');
+    setView('session');
+  };
 
   const handleFinishSession = (stats, data) => {
     setSessionStats(stats);
@@ -29,10 +40,17 @@ const Logger = ({ openCart, onTabChange }) => {
     setView('success');
   };
 
-  const handleCompleteLog = (rpe, notes) => {
-    console.log('handleCompleteLog called', { completedSessionData, sessionStats, rpe, notes });
+  const handleCompleteLog = (rpe, notes, selectedChallengeIds = []) => {
+    console.log('handleCompleteLog called', { completedSessionData, sessionStats, rpe, notes, selectedChallengeIds });
     if (completedSessionData && sessionStats) {
-      completeWorkout(completedSessionData, sessionStats, rpe, notes);
+      const newSession = completeWorkout(completedSessionData, sessionStats, rpe, notes);
+      
+      // Link to selected challenges
+      if (selectedChallengeIds.length > 0 && newSession) {
+        selectedChallengeIds.forEach(challengeId => {
+            linkWorkoutToChallenge(newSession.id, challengeId, completedSessionData, sessionStats);
+        });
+      }
     } else {
       console.error('Missing session data in handleCompleteLog');
     }
@@ -58,7 +76,7 @@ const Logger = ({ openCart, onTabChange }) => {
       <div className="h-full flex flex-col animate-fade-in pb-20"> {/* Added pb-20 for tray space */}
         <div className="flex items-center gap-4 mb-4">
           <button
-            onClick={() => setView(directorySource === 'session' ? 'session' : 'hub')}
+            onClick={() => setView(directorySource === 'session' ? 'session' : directorySource === 'builder' ? 'builder' : 'hub')}
             className="p-2 -ml-2 text-white/60 hover:text-white"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -66,7 +84,10 @@ const Logger = ({ openCart, onTabChange }) => {
           <h2 className="text-lg font-bold text-white">Select Exercise</h2>
         </div>
         <div className="flex-1 bg-white/5 rounded-xl border border-white/10 overflow-hidden flex flex-col">
-          <ExerciseDirectory onFinishSelection={() => setView('session')} />
+          <ExerciseDirectory 
+            isBuilderMode={directorySource === 'builder'}
+            onFinishSelection={() => setView(directorySource === 'builder' ? 'builder' : 'session')} 
+          />
         </div>
       </div>
     );
@@ -86,11 +107,35 @@ const Logger = ({ openCart, onTabChange }) => {
   }
 
   if (view === 'folder' && activeFolder) {
+    const currentFolder = routines.find(r => r.id === activeFolder.id) || activeFolder;
     return (
       <FolderDetailView
-        folder={activeFolder}
+        folder={currentFolder}
         onBack={() => setView('library')}
         onStartTemplate={handleStartTemplate}
+      />
+    );
+  }
+
+  if (view === 'builder') {
+    return (
+      <TemplateBuilder
+        onBack={() => setView('hub')}
+        onAddExercise={() => {
+          setDirectorySource('builder');
+          setView('directory');
+        }}
+        onSaveComplete={(folderId) => {
+          if (folderId) {
+            const folder = routines.find(r => r.id === folderId);
+            if (folder) {
+                setActiveFolder(folder);
+                setView('folder');
+                return;
+            }
+          }
+          setView('library');
+        }}
       />
     );
   }
@@ -98,7 +143,7 @@ const Logger = ({ openCart, onTabChange }) => {
   if (view === 'session') {
     return (
       <ActiveSession
-        onBack={() => setView('hub')}
+        onBack={() => setView(sessionSource === 'folder' ? 'folder' : 'hub')}
         onAddExercise={() => {
           setDirectorySource('session');
           setView('directory');
@@ -124,12 +169,12 @@ const Logger = ({ openCart, onTabChange }) => {
       onStartEmpty={() => {
         clearCart();
         setDirectorySource('hub');
-        setView('directory'); // Go straight to directory
+        setSessionSource('hub');
+        setView('directory');
       }}
       onBuildNew={() => {
         clearCart();
-        setDirectorySource('hub');
-        setView('directory');
+        setView('builder');
       }}
       onOpenLibrary={() => setView('library')}
     />
@@ -141,15 +186,17 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   return (
-    <WorkoutProvider>
-      <Layout activeTab={activeTab} onTabChange={setActiveTab}>
-        {activeTab === 'dashboard' && <Dashboard onStartWorkout={() => setActiveTab('logger')} />}
-        {activeTab === 'logger' && <Logger openCart={() => setIsCartOpen(true)} onTabChange={setActiveTab} />}
-        {activeTab === 'history' && <History />}
+    <ChallengeProvider>
+      <WorkoutProvider>
+        <Layout activeTab={activeTab} onTabChange={setActiveTab}>
+          {activeTab === 'dashboard' && <Dashboard onStartWorkout={() => setActiveTab('logger')} />}
+          {activeTab === 'logger' && <Logger openCart={() => setIsCartOpen(true)} onTabChange={setActiveTab} />}
+          {activeTab === 'history' && <History />}
 
-        <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-      </Layout>
-    </WorkoutProvider>
+          <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+        </Layout>
+      </WorkoutProvider>
+    </ChallengeProvider>
   );
 }
 

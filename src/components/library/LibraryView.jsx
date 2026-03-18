@@ -21,8 +21,8 @@ const LibraryView = ({ onBack, routines, onSelectFolder }) => {
                         <div className="p-3 bg-primary/10 rounded-xl text-primary group-hover:bg-primary group-hover:text-white transition-colors w-fit">
                             <Folder className="w-6 h-6" />
                         </div>
-                        <div className="text-left mt-4">
-                            <h3 className="font-bold text-white text-lg leading-tight">{routine.name}</h3>
+                        <div className="text-left mt-4 w-full overflow-hidden">
+                            <h3 className="font-bold text-white text-lg leading-tight truncate w-full">{routine.name}</h3>
                             <p className="text-xs text-white/40 mt-1">{routine.templates.length} Workouts</p>
                         </div>
                     </button>
