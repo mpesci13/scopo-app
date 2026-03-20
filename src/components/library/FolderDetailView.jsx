@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, Play, Edit2, Plus, Trash2, AlertTriangle, Search } from 'lucide-react';
 import { useWorkout } from '../../context/WorkoutContext';
 
-const FolderDetailView = ({ folder, onBack, onStartTemplate }) => {
+const FolderDetailView = ({ folder, onBack, onStartTemplate, onEditTemplate }) => {
     const { deleteTemplate, updateTemplateLastUsed } = useWorkout();
     const [expandedIds, setExpandedIds] = useState(new Set());
     const [templateToDelete, setTemplateToDelete] = useState(null);
@@ -87,11 +87,11 @@ const FolderDetailView = ({ folder, onBack, onStartTemplate }) => {
                                             </p>
                                             <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest flex items-center gap-2 flex-wrap leading-relaxed">
                                                 <span>Created {new Date(template.createdAt).toLocaleDateString()}</span>
-                                                {template.lastUsed && (
-                                                    <>
-                                                        <span className="w-1 h-1 rounded-full bg-white/20 shrink-0"></span>
-                                                        <span className="text-primary/90 font-black">Used {new Date(template.lastUsed).toLocaleDateString()}</span>
-                                                    </>
+                                                <span className="w-1 h-1 rounded-full bg-white/20 shrink-0"></span>
+                                                {template.lastUsed ? (
+                                                    <span className="text-primary/90 font-black">Used {new Date(template.lastUsed).toLocaleDateString()}</span>
+                                                ) : (
+                                                    <span className="text-white/20 font-black">Never Used</span>
                                                 )}
                                             </p>
                                         </div>
@@ -125,7 +125,13 @@ const FolderDetailView = ({ folder, onBack, onStartTemplate }) => {
 
                                 {/* Bottom Actions */}
                                 <div className="grid grid-cols-3 gap-2 pt-3 relative z-10 w-full">
-                                    <button className="flex items-center justify-center gap-1.5 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-bold text-white transition-colors uppercase tracking-widest">
+                                    <button 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onEditTemplate(template);
+                                        }}
+                                        className="flex items-center justify-center gap-1.5 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-bold text-white transition-colors uppercase tracking-widest"
+                                    >
                                         <Edit2 className="w-3 h-3" />
                                         Edit
                                     </button>

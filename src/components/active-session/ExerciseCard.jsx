@@ -55,53 +55,70 @@ const ProgressCircle = ({ total, completed }) => {
     );
 };
 
-const SwipeableSetRow = ({ children, onDelete }) => {
+const SwipeableSetRow = ({ children, onDelete, onCopy }) => {
     const [offsetX, setOffsetX] = useState(0);
     const startX = useRef(0);
+    const isDragging = useRef(false);
 
-    const onTouchStart = (e) => {
-        startX.current = e.touches[0].clientX;
+    const onPointerDown = (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        // Ignore inputs/buttons to let them function normally
+        if (e.target.closest('input') || e.target.closest('button')) return;
+
+        isDragging.current = true;
+        startX.current = e.clientX - offsetX;
+        e.target.setPointerCapture(e.pointerId);
     };
 
-    const onTouchMove = (e) => {
-        const currentX = e.touches[0].clientX;
+    const onPointerMove = (e) => {
+        if (!isDragging.current) return;
+        const currentX = e.clientX;
         const diff = currentX - startX.current;
-        // Only allow swiping left (negative diff), capped at -80px logic
-        if (diff < 0 && diff > -100) {
+        // Allow swiping left (delete) and right (copy), capped at 100px
+        if (diff > -100 && diff < 100) {
             setOffsetX(diff);
         }
     };
 
-    const onTouchEnd = () => {
-        if (offsetX < -40) {
-            setOffsetX(-80); // Reveal delete
+    const onPointerUpOrCancel = (e) => {
+        if (!isDragging.current) return;
+        isDragging.current = false;
+        if (e.target.hasPointerCapture(e.pointerId)) {
+            e.target.releasePointerCapture(e.pointerId);
+        }
+
+        if (offsetX < -50) {
+            onDelete();
+            setOffsetX(0); 
+        } else if (offsetX > 50) {
+            onCopy();
+            setOffsetX(0);
         } else {
             setOffsetX(0); // Snap back
         }
     };
 
-    // Reset on outside click or something? Ideally we have a way to close it.
-    // For now, if they swipe back right, it closes (handled by onTouchMove/End logic if we allowed right swipe, currently strict left).
-    // Let's allow snapping back to 0 if they tap it?
-
     return (
-        <div className="relative overflow-hidden group/swipe">
-            {/* Delete Background / Button */}
-            <div
-                className="absolute inset-y-0 right-0 w-20 bg-red-500 flex items-center justify-center z-0 cursor-pointer"
-                onClick={onDelete}
-            >
-                <Trash2 className="w-5 h-5 text-white" />
+        <div className="relative overflow-hidden group/swipe rounded-lg">
+            {/* Background Base (reveals depending on swipe direction) */}
+            <div className={`absolute inset-0 z-0 transition-opacity duration-200 flex items-center ${offsetX > 0 ? 'bg-green-500/80 justify-start pl-6 opacity-100' : offsetX < 0 ? 'bg-red-500/80 justify-end pr-6 opacity-100' : 'opacity-0'}`}>
+                {offsetX > 0 && <Copy className="w-5 h-5 text-white" />}
+                {offsetX < 0 && <Trash2 className="w-5 h-5 text-white" />}
             </div>
 
             {/* Foreground Content */}
             <div
-                className="relative z-10 bg-[#111] transition-transform duration-200 ease-out flex items-center"
-                style={{ transform: `translateX(${offsetX}px)` }}
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-                onClick={() => setOffsetX(0)} // Tap to close
+                className="relative z-10 bg-[#111] transition-transform duration-200 ease-out flex items-center rounded-lg w-full"
+                style={{ 
+                    transform: `translateX(${offsetX}px)`,
+                    touchAction: 'pan-y', // allows continuous vertical scrolling natively, prevents horizontal gesture zooming
+                    userSelect: 'none' // prevents accidental text highlight while dragging with mouse
+                }}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUpOrCancel}
+                onPointerCancel={onPointerUpOrCancel}
+                onClick={() => offsetX !== 0 && setOffsetX(0)} // Tap anywhere to snap back if stuck
             >
                 {children}
             </div>
@@ -271,7 +288,7 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
                     {/* Sets */}
                     <div className="space-y-3">
                         {sets.map((set, index) => (
-                            <SwipeableSetRow key={set.id} onDelete={() => removeSet(set.id)}>
+                            <SwipeableSetRow key={set.id} onDelete={() => removeSet(set.id)} onCopy={() => copySetRow(index)}>
                                 <div key={set.id} className={`gap-2 items-center w-full bg-[#111] pr-1 ${isBuilderMode ? 'grid grid-cols-[2rem_1fr_1fr_4rem]' : 'grid grid-cols-[2rem_1fr_1fr_1fr_2rem]'}`}>
                                     <span className="text-sm font-bold text-white/40 flex justify-center">{index + 1}</span>
 

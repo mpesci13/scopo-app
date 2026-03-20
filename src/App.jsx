@@ -17,15 +17,22 @@ import { ChallengeProvider, useChallenge } from './context/ChallengeContext';
 import Dashboard from './components/Dashboard';
 
 // The old placeholder Dashboard component has been removed and replaced by the actual import.
-const Logger = ({ openCart, onTabChange }) => {
-  const [view, setView] = useState('hub'); // hub | directory | library | session | folder
+const Logger = ({ openCart, onTabChange, initialAction }) => {
+  const [view, setView] = useState(initialAction === 'empty' ? 'directory' : 'hub'); // hub | directory | library | session | folder
   const [activeFolder, setActiveFolder] = useState(null);
+  const [editingTemplate, setEditingTemplate] = useState(null);
   const [directorySource, setDirectorySource] = useState('hub'); // 'hub' | 'session'
   const [sessionSource, setSessionSource] = useState('hub'); // 'hub' | 'folder'
   const [sessionStats, setSessionStats] = useState(null);
   const [completedSessionData, setCompletedSessionData] = useState(null);
   const { routines, clearCart, completeWorkout, addToCart, loadTemplate } = useWorkout();
   const { linkWorkoutToChallenge } = useChallenge();
+
+  React.useEffect(() => {
+    if (initialAction === 'empty') {
+      clearCart();
+    }
+  }, [initialAction, clearCart]);
 
   const handleStartTemplate = (template) => {
     loadTemplate(template.exercises);
@@ -113,6 +120,11 @@ const Logger = ({ openCart, onTabChange }) => {
         folder={currentFolder}
         onBack={() => setView('library')}
         onStartTemplate={handleStartTemplate}
+        onEditTemplate={(template) => {
+          loadTemplate(template.exercises);
+          setEditingTemplate({ ...template, folderId: currentFolder.id });
+          setView('builder');
+        }}
       />
     );
   }
@@ -120,12 +132,17 @@ const Logger = ({ openCart, onTabChange }) => {
   if (view === 'builder') {
     return (
       <TemplateBuilder
-        onBack={() => setView('hub')}
+        initialTemplate={editingTemplate}
+        onBack={() => {
+          setEditingTemplate(null);
+          setView(editingTemplate ? 'folder' : 'hub');
+        }}
         onAddExercise={() => {
           setDirectorySource('builder');
           setView('directory');
         }}
         onSaveComplete={(folderId) => {
+          setEditingTemplate(null);
           if (folderId) {
             const folder = routines.find(r => r.id === folderId);
             if (folder) {
@@ -174,6 +191,7 @@ const Logger = ({ openCart, onTabChange }) => {
       }}
       onBuildNew={() => {
         clearCart();
+        setEditingTemplate(null);
         setView('builder');
       }}
       onOpenLibrary={() => setView('library')}
@@ -184,13 +202,22 @@ const Logger = ({ openCart, onTabChange }) => {
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard'); // Default to Dashboard
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [loggerInitialAction, setLoggerInitialAction] = useState(null);
+
+  const handleTabChange = (tab) => {
+    if (tab === 'logger') setLoggerInitialAction(null);
+    setActiveTab(tab);
+  };
 
   return (
     <ChallengeProvider>
       <WorkoutProvider>
-        <Layout activeTab={activeTab} onTabChange={setActiveTab}>
-          {activeTab === 'dashboard' && <Dashboard onStartWorkout={() => setActiveTab('logger')} />}
-          {activeTab === 'logger' && <Logger openCart={() => setIsCartOpen(true)} onTabChange={setActiveTab} />}
+        <Layout activeTab={activeTab} onTabChange={handleTabChange}>
+          {activeTab === 'dashboard' && <Dashboard onStartWorkout={() => {
+            setLoggerInitialAction('empty');
+            setActiveTab('logger');
+          }} />}
+          {activeTab === 'logger' && <Logger openCart={() => setIsCartOpen(true)} onTabChange={setActiveTab} initialAction={loggerInitialAction} />}
           {activeTab === 'history' && <History />}
 
           <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />

@@ -3,8 +3,8 @@ import { Plus, ChevronsDown, ChevronsUp, AlertTriangle, X as XIcon, Save } from 
 import { useWorkout } from '../../context/WorkoutContext';
 import ExerciseCard from '../active-session/ExerciseCard';
 
-const TemplateBuilder = ({ onBack, onAddExercise, onSaveComplete }) => {
-    const { cart, removeFromCart, updateCartItem, saveTemplate, clearCart, routines } = useWorkout();
+const TemplateBuilder = ({ initialTemplate, onBack, onAddExercise, onSaveComplete }) => {
+    const { cart, removeFromCart, updateCartItem, saveTemplate, updateTemplate, deleteTemplate, clearCart, routines } = useWorkout();
     
     // Global Expand/Collapse Logic
     const [expandedIds, setExpandedIds] = useState(() => new Set());
@@ -29,23 +29,43 @@ const TemplateBuilder = ({ onBack, onAddExercise, onSaveComplete }) => {
     };
 
     const [showCancelModal, setShowCancelModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showSaveModal, setShowSaveModal] = useState(false);
-    const [templateName, setTemplateName] = useState('');
-    const [selectedRoutineId, setSelectedRoutineId] = useState(null);
+    
+    const [templateName, setTemplateName] = useState(initialTemplate ? initialTemplate.name : '');
+    const [selectedRoutineId, setSelectedRoutineId] = useState(initialTemplate ? initialTemplate.folderId : null);
 
     const isDuplicateName = () => {
         if (!templateName.trim()) return false;
         const nameToCheck = templateName.trim().toLowerCase();
+        
+        if (initialTemplate && nameToCheck === initialTemplate.name.toLowerCase()) {
+            return false;
+        }
+
         return routines.some(routine => 
             routine.templates && routine.templates.some(t => t.name.toLowerCase() === nameToCheck)
         );
     };
 
     const handleSave = () => {
-        if (!templateName || isDuplicateName()) return;
-        saveTemplate(templateName, selectedRoutineId);
+        if (!templateName.trim() || isDuplicateName() || !selectedRoutineId || cart.length === 0) return;
+        
+        if (initialTemplate) {
+            updateTemplate(initialTemplate.folderId, selectedRoutineId, initialTemplate.id, templateName, cart);
+        } else {
+            saveTemplate(templateName, selectedRoutineId);
+        }
         clearCart();
         onSaveComplete(selectedRoutineId);
+    };
+
+    const handleDelete = () => {
+        if (initialTemplate) {
+            deleteTemplate(initialTemplate.folderId, initialTemplate.id);
+            clearCart();
+            onBack();
+        }
     };
 
     const confirmCancel = () => {
@@ -66,7 +86,7 @@ const TemplateBuilder = ({ onBack, onAddExercise, onSaveComplete }) => {
 
                 <div className="flex flex-col items-center flex-1">
                     <span className="text-xl font-black text-white tracking-widest leading-none">
-                        Builder
+                        {initialTemplate ? 'Editor' : 'Builder'}
                     </span>
                     <span className="text-[10px] text-primary font-bold uppercase tracking-wider mt-1">
                         Template
@@ -136,6 +156,15 @@ const TemplateBuilder = ({ onBack, onAddExercise, onSaveComplete }) => {
                                 <Save className="w-5 h-5" />
                                 Save Template
                             </button>
+
+                            {initialTemplate && (
+                                <button
+                                    onClick={() => setShowDeleteModal(true)}
+                                    className="py-4 w-full bg-red-500/10 text-red-500 font-bold rounded-2xl text-sm uppercase tracking-wide transition-all active:scale-95 mt-4"
+                                >
+                                    Delete Template
+                                </button>
+                            )}
                         </>
                     )}
                 </div>
@@ -164,6 +193,35 @@ const TemplateBuilder = ({ onBack, onAddExercise, onSaveComplete }) => {
                                 className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-colors shadow-lg"
                             >
                                 Discard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Modal */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 flex items-center justify-center z-[60] bg-black/80 backdrop-blur-sm animate-fade-in p-6">
+                    <div className="bg-[#1a1a1a] border border-red-500/20 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl relative">
+                        <div className="flex items-center gap-3 text-red-500">
+                            <AlertTriangle className="w-6 h-6" />
+                            <h3 className="text-lg font-bold">Delete Template?</h3>
+                        </div>
+                        <p className="text-white/60 text-sm leading-relaxed">
+                            Are you sure you want to permanently delete this template?
+                        </p>
+                        <div className="flex gap-3 pt-4">
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-medium transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-colors shadow-lg"
+                            >
+                                Delete
                             </button>
                         </div>
                     </div>
@@ -223,7 +281,7 @@ const TemplateBuilder = ({ onBack, onAddExercise, onSaveComplete }) => {
 
                             <button
                                 onClick={handleSave}
-                                disabled={!templateName.trim() || isDuplicateName()}
+                                disabled={!templateName.trim() || isDuplicateName() || !selectedRoutineId}
                                 className="w-full mt-4 h-14 bg-[#002E5D] text-white font-bold rounded-xl shadow-[0_4px_20px_rgba(0,46,93,0.4)] disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98]"
                             >
                                 Save to Library

@@ -337,6 +337,28 @@ export const WorkoutProvider = ({ children }) => {
         }));
     };
 
+    const updateTemplate = (oldRoutineId, newRoutineId, templateId, newName, newExercises) => {
+        setRoutines(prev => {
+            let routinesCopy = JSON.parse(JSON.stringify(prev));
+            let targetTemplate = null;
+            
+            const oldRoutine = routinesCopy.find(r => r.id === oldRoutineId);
+            if (oldRoutine) {
+                targetTemplate = oldRoutine.templates.find(t => t.id === templateId);
+                oldRoutine.templates = oldRoutine.templates.filter(t => t.id !== templateId);
+            }
+            
+            const newRoutine = routinesCopy.find(r => r.id === newRoutineId);
+            if (newRoutine && targetTemplate) {
+                targetTemplate.name = newName;
+                targetTemplate.exercises = newExercises;
+                newRoutine.templates.push(targetTemplate);
+            }
+            
+            return routinesCopy;
+        });
+    };
+
     const saveTemplate = (name, routineId = null) => {
         if (!name.trim() || cart.length === 0) return;
         const newTemplate = {
@@ -437,6 +459,7 @@ export const WorkoutProvider = ({ children }) => {
             templates,
             deleteTemplate,
             updateTemplateLastUsed,
+            updateTemplate,
             saveTemplate,
             routines,
             addRoutine,
