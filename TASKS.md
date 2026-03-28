@@ -13,6 +13,7 @@
 - [ ] **Manual Rest Timer** (User-defined toggle per exercise)
 
 ## Phase 3: The Reflection (The Performance Feed)
+- [x] **Edit Past Workout Time** (Allow editing duration in History)
 - [ ] **The "Record Breaker" UI** (Navy shimmer/badges for PBs)
 - [ ] **Power Score Calculation** (Single volume metric per workout)
 - [ ] **History Feed** (List view of sessions with "Ghost" comparisons)

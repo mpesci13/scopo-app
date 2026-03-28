@@ -80,7 +80,7 @@ const Dashboard = ({ onStartWorkout }) => {
                         <p className="text-white/80 text-sm font-medium">Log a new workout</p>
                     </div>
                     <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center relative z-10">
-                        <Play className="w-5 h-5 text-white ml-1" />
+                        <Play className="w-6 h-6 text-white fill-white translate-x-0.5" />
                     </div>
                 </button>
 

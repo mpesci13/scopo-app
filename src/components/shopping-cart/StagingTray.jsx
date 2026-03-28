@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Trash2, GripVertical, ChevronUp } from 'lucide-react';
 import { useWorkout } from '../../context/WorkoutContext';
 import {
@@ -77,6 +77,18 @@ const SortableItem = ({ item, onRemove }) => {
 const StagingTray = ({ onStartWorkout, isBuilderMode = false }) => {
     const { cart, removeFromCart, reorderCart } = useWorkout();
     const [isOpen, setIsOpen] = useState(false);
+    const [isBumping, setIsBumping] = useState(false);
+    const prevCartLength = useRef(cart?.length || 0);
+
+    useEffect(() => {
+        if (cart.length > prevCartLength.current) {
+            setIsBumping(true);
+            const timer = setTimeout(() => setIsBumping(false), 300);
+            prevCartLength.current = cart.length;
+            return () => clearTimeout(timer);
+        }
+        prevCartLength.current = cart.length;
+    }, [cart.length]);
 
     // Sensors for drag detection
     const sensors = useSensors(
@@ -158,7 +170,7 @@ const StagingTray = ({ onStartWorkout, isBuilderMode = false }) => {
                                 setIsOpen(false);
                                 onStartWorkout();
                             }}
-                            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-[0_4px_20px_rgba(0,46,93,0.4)] active:scale-95 transition-all text-base"
+                            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-[0_4px_20px_rgba(0,46,93,0.4)] active:scale-95 transition-all text-base mb-4"
                         >
                             {isBuilderMode ? 'Customize Template' : 'Start Workout'}
                         </button>
@@ -169,7 +181,7 @@ const StagingTray = ({ onStartWorkout, isBuilderMode = false }) => {
             {/* Closed State - Floating Bar */}
             <div
                 onClick={() => setIsOpen(true)}
-                className={`fixed bottom-[80px] left-4 right-4 z-[100] bg-primary rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/10 cursor-pointer overflow-hidden transition-all duration-300 ${isOpen ? 'translate-y-[200%] opacity-0' : 'translate-y-0 opacity-100'}`}
+                className={`fixed bottom-[80px] left-4 right-4 z-[100] bg-primary rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/10 cursor-pointer overflow-hidden transition-all duration-300 ${isOpen ? 'translate-y-[200%] opacity-0' : 'translate-y-0 opacity-100'} ${isBumping ? 'scale-[1.04] ring-2 ring-white/50 brightness-110 shadow-[0_12px_40px_rgba(0,100,255,0.6)]' : ''}`}
             >
                 <div className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
                     <div className="flex flex-col">

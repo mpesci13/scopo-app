@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 
 const ChallengeContext = createContext();
 
@@ -21,54 +21,8 @@ export const ChallengeProvider = ({ children }) => {
         const saved = localStorage.getItem('scopo_challenges');
         if (saved) return JSON.parse(saved);
 
-        // Default Seed Data
-        return [
-            {
-                id: 'chal_spring_volume',
-                title: 'Spring Lifting Festival',
-                description: 'Hit 100k lbs before summer starts!',
-                goalType: 'volume', // 'volume', 'reps', 'sessions'
-                duration: {
-                    startDate: new Date(Date.now() - 5 * 86400000).toISOString(),
-                    endDate: new Date(Date.now() + 30 * 86400000).toISOString()
-                },
-                participants: [
-                    {
-                        userId: 'user_123',
-                        name: 'Marco',
-                        currentScore: 24500, // starting score
-                        streak: 2,
-                        linkedWorkoutIds: []
-                    },
-                    {
-                        userId: 'user_456',
-                        name: 'Alex',
-                        currentScore: 18200,
-                        streak: 1,
-                        linkedWorkoutIds: []
-                    }
-                ]
-            },
-            {
-                id: 'chal_consistency_march',
-                title: 'March Madness',
-                description: 'Record 15 sessions this month.',
-                goalType: 'sessions', // counts completeWorkout
-                duration: {
-                    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
-                    endDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString()
-                },
-                participants: [
-                    {
-                        userId: 'user_123',
-                        name: 'Marco',
-                        currentScore: 5,
-                        streak: 3,
-                        linkedWorkoutIds: []
-                    }
-                ]
-            }
-        ];
+        // Default to empty array
+        return [];
     });
 
     useEffect(() => {
@@ -77,11 +31,22 @@ export const ChallengeProvider = ({ children }) => {
 
     // Derived states
     // Get all challenges the current user is a part of and that are currently active
-    const activeUserChallenges = challenges.filter(c => {
-        const isParticipant = c.participants.some(p => p.userId === CURRENT_USER.id);
-        const isOngoing = new Date(c.duration.endDate) >= new Date();
-        return isParticipant && isOngoing;
-    });
+    const activeChallenge = useMemo(() => {
+        return challenges.find(c => {
+            const isParticipant = c.participants.some(p => p.userId === CURRENT_USER.id);
+            const isOngoing = new Date(c.duration.endDate) >= new Date() && c.status !== 'abandoned';
+            return isParticipant && isOngoing;
+        });
+    }, [challenges]);
+
+    // Get all past challenges (completed or abandoned)
+    const pastChallenges = useMemo(() => {
+        return challenges.filter(c => {
+            const isParticipant = c.participants.some(p => p.userId === CURRENT_USER.id);
+            const isPast = new Date(c.duration.endDate) < new Date() || c.status === 'abandoned';
+            return isParticipant && isPast;
+        }).sort((a, b) => new Date(b.duration.endDate) - new Date(a.duration.endDate));
+    }, [challenges]);
 
     const createChallenge = (data) => {
         const newChallenge = {
@@ -102,6 +67,54 @@ export const ChallengeProvider = ({ children }) => {
         };
         setChallenges(prev => [...prev, newChallenge]);
         return newChallenge;
+    };
+
+    const createCustomChallenge = (title, durationDays, rules) => {
+        const startDate = new Date().toISOString();
+        const endDate = new Date(Date.now() + durationDays * 86400000).toISOString();
+
+        const newChallenge = {
+            id: `chal_${Date.now()}`,
+            title,
+            description: `${durationDays}-Day Custom Challenge`,
+            goalType: 'custom',
+            duration: { startDate, endDate },
+            rules,
+            participants: [
+                {
+                    userId: CURRENT_USER.id,
+                    name: CURRENT_USER.name,
+                    currentScore: 0,
+                    streak: 0,
+                    linkedWorkoutIds: [],
+                    dailyLogs: {},
+                    progress: {}
+                }
+            ]
+        };
+        setChallenges(prev => [newChallenge, ...prev]);
+        return newChallenge;
+    };
+
+    const toggleDailyRule = (challengeId, ruleId, dateString, isCompleted) => {
+        setChallenges(prev => prev.map(c => {
+            if (c.id !== challengeId) return c;
+            return {
+                ...c,
+                participants: c.participants.map(p => {
+                    if (p.userId === CURRENT_USER.id) {
+                        const dailyLogs = p.dailyLogs ? { ...p.dailyLogs } : {};
+                        if (!dailyLogs[dateString]) dailyLogs[dateString] = {};
+                        dailyLogs[dateString] = {
+                            ...dailyLogs[dateString],
+                            [ruleId]: isCompleted
+                        };
+                        return { ...p, dailyLogs };
+                    }
+                    return p;
+                })
+            };
+        }));
     };
 
     const joinChallenge = (challengeId) => {
@@ -128,6 +141,60 @@ export const ChallengeProvider = ({ children }) => {
         }));
     };
 
+    const abandonChallenge = (challengeId, note = '') => {
+        setChallenges(prev => prev.map(c => {
+            if (c.id === challengeId) {
+                return {
+                    ...c,
+                    status: 'abandoned',
+                    reflection: note,
+                    duration: {
+                        ...c.duration,
+                        endDate: new Date().toISOString() // Force it to end now
+                    }
+                };
+            }
+            return c;
+        }));
+    };
+
+    const completeChallenge = (challengeId, note = '') => {
+        setChallenges(prev => prev.map(c => {
+            if (c.id === challengeId) {
+                return {
+                    ...c,
+                    status: 'completed',
+                    reflection: note,
+                    duration: {
+                        ...c.duration,
+                        endDate: new Date().toISOString() // Set current time as completion
+                    }
+                };
+            }
+            return c;
+        }));
+    };
+
+    const updateChallenge = (challengeId, data) => {
+        setChallenges(prev => prev.map(c => {
+            if (c.id !== challengeId) return c;
+            
+            // Recalculate end date based on original start date + new durationDays
+            const startStr = c.duration.startDate;
+            const newEndDate = new Date(new Date(startStr).getTime() + data.durationDays * 86400000).toISOString();
+
+            return {
+                ...c,
+                title: data.title,
+                rules: data.rules,
+                duration: {
+                    ...c.duration,
+                    endDate: newEndDate
+                }
+            };
+        }));
+    };
+
     const linkWorkoutToChallenge = (workoutId, challengeId, workoutData, stats) => {
         setChallenges(prev => prev.map(c => {
             if (c.id !== challengeId) return c;
@@ -142,7 +209,7 @@ export const ChallengeProvider = ({ children }) => {
                 scoreToAdd = 1;
             }
 
-            if (scoreToAdd === 0) return c;
+            if (scoreToAdd === 0 && c.goalType !== 'custom') return c;
 
             return {
                 ...c,
@@ -154,10 +221,25 @@ export const ChallengeProvider = ({ children }) => {
                             return p;
                         }
 
+                        // Auto-check workout rules for custom challenges
+                        let updatedDailyLogs = p.dailyLogs ? { ...p.dailyLogs } : {};
+                        if (c.goalType === 'custom' && c.rules) {
+                            const todayStr = new Date().toLocaleDateString('en-US');
+                            c.rules.forEach(rule => {
+                                if (rule.isWorkoutRule) {
+                                    if (!updatedDailyLogs[todayStr]) {
+                                        updatedDailyLogs[todayStr] = {};
+                                    }
+                                    updatedDailyLogs[todayStr][rule.id] = true;
+                                }
+                            });
+                        }
+
                         return {
                             ...p,
                             currentScore: p.currentScore + scoreToAdd,
-                            linkedWorkoutIds: [...(p.linkedWorkoutIds || []), workoutId]
+                            linkedWorkoutIds: [...(p.linkedWorkoutIds || []), workoutId],
+                            dailyLogs: Object.keys(updatedDailyLogs).length > 0 ? updatedDailyLogs : p.dailyLogs
                         };
                     }
                     return p;
@@ -179,7 +261,7 @@ export const ChallengeProvider = ({ children }) => {
                 scoreToSubtract = 1;
             }
 
-            if (scoreToSubtract === 0) return c;
+            if (scoreToSubtract === 0 && c.goalType !== 'custom') return c;
 
             return {
                 ...c,
@@ -230,9 +312,15 @@ export const ChallengeProvider = ({ children }) => {
     return (
         <ChallengeContext.Provider value={{
             challenges,
-            activeUserChallenges,
+            activeChallenge,
+            pastChallenges,
             createChallenge,
+            createCustomChallenge,
+            toggleDailyRule,
             joinChallenge,
+            abandonChallenge,
+            completeChallenge,
+            updateChallenge,
             linkWorkoutToChallenge,
             unlinkWorkoutFromChallenge,
             updateChallengeWorkoutStats,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Dumbbell, CalendarClock } from 'lucide-react';
+import { Home, Dumbbell, CalendarClock, Target } from 'lucide-react';
 
 const BottomNav = ({ activeTab, onTabChange }) => {
     return (
@@ -22,6 +22,12 @@ const BottomNav = ({ activeTab, onTabChange }) => {
                     label="History"
                     isActive={activeTab === 'history'}
                     onClick={() => onTabChange('history')}
+                />
+                <NavButton
+                    icon={Target}
+                    label="Challenges"
+                    isActive={activeTab === 'challenges'}
+                    onClick={() => onTabChange('challenges')}
                 />
             </div>
         </nav>

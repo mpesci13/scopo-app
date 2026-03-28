@@ -206,7 +206,16 @@ const History = () => {
                         <div className="grid grid-cols-3 gap-4">
                             <div className="bg-black/40 rounded-2xl p-3 flex flex-col items-center justify-center border border-white/5">
                                 <span className="text-[10px] text-white/40 uppercase tracking-widest font-bold mb-1">Time</span>
-                                <span className="font-mono font-bold text-lg text-white">{selectedSession.duration}</span>
+                                {isEditing && editedSession ? (
+                                    <input 
+                                        type="text" 
+                                        value={editedSession.duration || ''} 
+                                        onChange={(e) => setEditedSession(prev => ({ ...prev, duration: e.target.value }))}
+                                        className="w-20 bg-transparent text-center font-mono font-bold text-lg text-white focus:outline-none border-b border-primary/50"
+                                    />
+                                ) : (
+                                    <span className="font-mono font-bold text-lg text-white">{selectedSession.duration}</span>
+                                )}
                             </div>
                             <div className="bg-black/40 rounded-2xl p-3 flex flex-col items-center justify-center border border-white/5">
                                 <span className="text-[10px] text-white/40 uppercase tracking-widest font-bold mb-1">Volume</span>
@@ -234,7 +243,7 @@ const History = () => {
                         <h3 className="text-sm font-bold text-white/60 uppercase tracking-widest px-2">Exercises</h3>
 
                         <div className="space-y-3">
-                            {(isEditing ? editedSession : selectedSession).exercises.map((ex, idx) => (
+                            {(isEditing && editedSession ? editedSession : selectedSession).exercises.map((ex, idx) => (
                                 <div key={ex.id || idx} className="bg-white/5 border border-white/10 rounded-2xl p-4">
                                     <div className="flex justify-between items-center mb-4">
                                         <h4 className="font-bold text-white text-lg">{ex.name}</h4>
@@ -257,7 +266,7 @@ const History = () => {
                                                 className={`grid grid-cols-4 gap-2 px-2 py-2 rounded-lg items-center ${set.completed ? 'bg-black/40 border border-white/5' : 'opacity-30'}`}
                                             >
                                                 <div className="text-center text-xs font-mono text-white/40">{sIdx + 1}</div>
-                                                {isEditing ? (
+                                                {isEditing && editedSession ? (
                                                     <>
                                                         <div className="text-center">
                                                             <input type="number" value={set.weight} onChange={(e) => handleSetEdit(idx, sIdx, 'weight', e.target.value)} className="w-full bg-transparent text-center font-mono font-bold text-white focus:outline-none border-b border-primary/50 py-1" />
@@ -279,7 +288,7 @@ const History = () => {
                                             </div>
                                         ))}
 
-                                        {isEditing && (
+                                        {isEditing && editedSession && (
                                             <button onClick={() => handleAddSet(idx)} className="mt-3 w-full py-2 border border-dashed border-white/20 rounded-xl text-xs font-bold text-white/40 hover:text-white/60 hover:border-white/40 transition-colors flex items-center justify-center gap-2">
                                                 <Plus className="w-3 h-3" /> Add Set
                                             </button>

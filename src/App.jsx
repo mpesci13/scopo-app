@@ -15,8 +15,8 @@ import { WorkoutProvider, useWorkout } from './context/WorkoutContext';
 import { ChallengeProvider, useChallenge } from './context/ChallengeContext';
 
 import Dashboard from './components/Dashboard';
+import ChallengesTab from './components/challenges/ChallengesTab';
 
-// The old placeholder Dashboard component has been removed and replaced by the actual import.
 const Logger = ({ openCart, onTabChange, initialAction }) => {
   const [view, setView] = useState(initialAction === 'empty' ? 'directory' : 'hub'); // hub | directory | library | session | folder
   const [activeFolder, setActiveFolder] = useState(null);
@@ -32,7 +32,8 @@ const Logger = ({ openCart, onTabChange, initialAction }) => {
     if (initialAction === 'empty') {
       clearCart();
     }
-  }, [initialAction, clearCart]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialAction]);
 
   const handleStartTemplate = (template) => {
     loadTemplate(template.exercises);
@@ -108,6 +109,18 @@ const Logger = ({ openCart, onTabChange, initialAction }) => {
         onSelectFolder={(folder) => {
           setActiveFolder(folder);
           setView('folder');
+        }}
+        onStartTemplate={(template) => {
+          const folder = routines.find(r => r.templates.some(t => t.id === template.id));
+          setActiveFolder(folder); // Optional context setting
+          handleStartTemplate(template);
+        }}
+        onEditTemplate={(template) => {
+          const folder = routines.find(r => r.templates.some(t => t.id === template.id));
+          setActiveFolder(folder); // Optional context setting
+          loadTemplate(template.exercises);
+          setEditingTemplate({ ...template, folderId: folder.id });
+          setView('builder');
         }}
       />
     );
@@ -217,6 +230,7 @@ function App() {
             setLoggerInitialAction('empty');
             setActiveTab('logger');
           }} />}
+          {activeTab === 'challenges' && <ChallengesTab />}
           {activeTab === 'logger' && <Logger openCart={() => setIsCartOpen(true)} onTabChange={setActiveTab} initialAction={loggerInitialAction} />}
           {activeTab === 'history' && <History />}
 

@@ -126,10 +126,29 @@ const SwipeableSetRow = ({ children, onDelete, onCopy }) => {
     );
 };
 
-const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdateSets, isBuilderMode = false }) => {
+const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdateSets, onUpdateExercise, isBuilderMode = false }) => {
     const [isEditingSetCount, setIsEditingSetCount] = useState(false);
     // Sets are now passed in via exercise.sets
     const sets = exercise.sets || [];
+    const trackType = exercise.trackType || 'weight_reps';
+    const bwType = exercise.bwType || 'bodyweight';
+
+    const showWeight = trackType === 'weight_reps' || trackType === 'weight_time' || (trackType === 'bodyweight_reps' && bwType !== 'bodyweight');
+    const showReps = trackType === 'weight_reps' || trackType === 'bodyweight_reps';
+    const showDistance = trackType === 'distance_time';
+    const showTime = trackType === 'distance_time' || trackType === 'weight_time';
+    const showRpe = trackType !== 'distance_time'; 
+
+    let midCols = [];
+    if (showWeight) midCols.push('1fr');
+    if (showDistance) midCols.push('1fr');
+    if (showReps) midCols.push('1fr');
+    if (showTime) midCols.push('1fr');
+    if (showRpe && !isBuilderMode) midCols.push('1fr');
+    if (!isBuilderMode) midCols.push('2rem'); 
+    if (isBuilderMode) midCols.push('4rem');
+
+    const gridTemplateColumns = `2rem ${midCols.join(' ')}`;
 
     // Calculate completed sets for the circle
     const completedSets = sets.filter(s => s.completed).length;
@@ -150,6 +169,8 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
             id: Date.now() + Math.random(),
             weight: isBuilderMode ? '' : (lastSet ? lastSet.weight : ''),
             reps: isBuilderMode ? '' : (lastSet ? lastSet.reps : ''),
+            distance: isBuilderMode ? '' : (lastSet ? lastSet.distance : ''),
+            time: isBuilderMode ? '' : (lastSet ? lastSet.time : ''),
             rpe: 0,
             completed: false
         };
@@ -158,11 +179,12 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
 
     const removeSet = (id) => {
         if (sets.length === 1) {
-            // If it's the very last set, just clear its data instead of removing it entirely
             onUpdateSets([{
                 ...sets[0],
                 weight: '',
                 reps: '',
+                distance: '',
+                time: '',
                 rpe: 0,
                 completed: false
             }]);
@@ -175,20 +197,23 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
         const sourceSet = sets[index];
         const newSets = [...sets];
         
-        // Find the first completely empty row
-        const firstEmptyIndex = newSets.findIndex(s => s.weight === '' && s.reps === '');
+        const firstEmptyIndex = newSets.findIndex(s => !s.weight && !s.reps && !s.distance && !s.time);
         
         if (firstEmptyIndex !== -1) {
             newSets[firstEmptyIndex] = {
                 ...newSets[firstEmptyIndex],
                 weight: sourceSet.weight,
-                reps: sourceSet.reps
+                reps: sourceSet.reps,
+                distance: sourceSet.distance,
+                time: sourceSet.time
             };
         } else {
             newSets.push({
                 id: Date.now() + Math.random(),
                 weight: sourceSet.weight,
                 reps: sourceSet.reps,
+                distance: sourceSet.distance,
+                time: sourceSet.time,
                 rpe: 0,
                 completed: false
             });
@@ -207,6 +232,8 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
                     id: Date.now() + i + Math.random(),
                     weight: '',
                     reps: '',
+                    distance: '',
+                    time: '',
                     rpe: 0,
                     completed: false
                 });
@@ -275,12 +302,32 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
             {/* Expanded Content */}
             {isExpanded && (
                 <div className="p-4 pt-0 space-y-4 animate-fade-in">
+                    {/* Bodyweight Toggle */}
+                    {trackType === 'bodyweight_reps' && (
+                        <div className="flex bg-white/5 rounded-lg p-1 border border-white/10 mb-4 mx-0">
+                            {['bodyweight', 'weighted', 'assisted'].map((type) => (
+                                <button
+                                    key={type}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (onUpdateExercise) onUpdateExercise({ bwType: type });
+                                    }}
+                                    className={`flex-1 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${bwType === type ? 'bg-primary text-white shadow-md' : 'text-white/40 hover:text-white/80'}`}
+                                >
+                                    {type}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
                     {/* Column Headers */}
-                    <div className={`gap-2 px-0 text-[10px] uppercase tracking-wider text-white/30 font-semibold items-center text-center ${isBuilderMode ? 'grid grid-cols-[2rem_1fr_1fr_4rem]' : 'grid grid-cols-[2rem_1fr_1fr_1fr_2rem]'}`}>
+                    <div className="grid gap-2 px-0 text-[10px] uppercase tracking-wider text-white/30 font-semibold items-center text-center" style={{ gridTemplateColumns }}>
                         <div className="text-left pl-2">Set</div>
-                        <div>lbs</div>
-                        <div>Reps</div>
-                        {!isBuilderMode && <div>RPE</div>}
+                        {showWeight && <div>{trackType === 'bodyweight_reps' ? (bwType === 'assisted' ? '-lbs' : '+lbs') : 'lbs'}</div>}
+                        {showDistance && <div>Dist</div>}
+                        {showReps && <div>Reps</div>}
+                        {showTime && <div>Time</div>}
+                        {showRpe && !isBuilderMode && <div>RPE</div>}
                         {!isBuilderMode && <div>Done</div>}
                         {isBuilderMode && <div className="text-right pr-2">Actions</div>}
                     </div>
@@ -289,28 +336,53 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
                     <div className="space-y-3">
                         {sets.map((set, index) => (
                             <SwipeableSetRow key={set.id} onDelete={() => removeSet(set.id)} onCopy={() => copySetRow(index)}>
-                                <div key={set.id} className={`gap-2 items-center w-full bg-[#111] pr-1 ${isBuilderMode ? 'grid grid-cols-[2rem_1fr_1fr_4rem]' : 'grid grid-cols-[2rem_1fr_1fr_1fr_2rem]'}`}>
+                                <div key={set.id} className="grid gap-2 items-center w-full bg-[#111] pr-1" style={{ gridTemplateColumns }}>
                                     <span className="text-sm font-bold text-white/40 flex justify-center">{index + 1}</span>
 
-                                    <input
-                                        type="number"
-                                        inputMode="decimal"
-                                        placeholder="0"
-                                        value={set.weight}
-                                        onChange={(e) => updateSet(set.id, 'weight', e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg py-2 text-center text-white font-medium focus:border-primary focus:outline-none transition-colors placeholder:text-white/10 p-0"
-                                    />
+                                    {showWeight && (
+                                        <input
+                                            type="number"
+                                            inputMode="decimal"
+                                            placeholder="0"
+                                            value={set.weight}
+                                            onChange={(e) => updateSet(set.id, 'weight', e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg py-2 text-center text-white font-medium focus:border-primary focus:outline-none transition-colors placeholder:text-white/10 p-0"
+                                        />
+                                    )}
 
-                                    <input
-                                        type="number"
-                                        inputMode="decimal"
-                                        placeholder="0"
-                                        value={set.reps}
-                                        onChange={(e) => updateSet(set.id, 'reps', e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg py-2 text-center text-white font-medium focus:border-primary focus:outline-none transition-colors placeholder:text-white/10 p-0"
-                                    />
+                                    {showDistance && (
+                                        <input
+                                            type="number"
+                                            inputMode="decimal"
+                                            placeholder="0"
+                                            value={set.distance !== undefined ? set.distance : ''}
+                                            onChange={(e) => updateSet(set.id, 'distance', e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg py-2 text-center text-white font-medium focus:border-primary focus:outline-none transition-colors placeholder:text-white/10 p-0"
+                                        />
+                                    )}
 
-                                    {!isBuilderMode && (
+                                    {showReps && (
+                                        <input
+                                            type="number"
+                                            inputMode="decimal"
+                                            placeholder="0"
+                                            value={set.reps}
+                                            onChange={(e) => updateSet(set.id, 'reps', e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg py-2 text-center text-white font-medium focus:border-primary focus:outline-none transition-colors placeholder:text-white/10 p-0"
+                                        />
+                                    )}
+
+                                    {showTime && (
+                                        <input
+                                            type="text"
+                                            placeholder="--:--"
+                                            value={set.time !== undefined ? set.time : ''}
+                                            onChange={(e) => updateSet(set.id, 'time', e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg py-2 text-center text-white font-medium focus:border-primary focus:outline-none transition-colors placeholder:text-white/10 p-0"
+                                        />
+                                    )}
+
+                                    {showRpe && !isBuilderMode && (
                                         <div className="flex items-center justify-center">
                                             <RPEBar value={set.rpe} onChange={(val) => updateSet(set.id, 'rpe', val)} />
                                         </div>

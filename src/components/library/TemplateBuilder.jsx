@@ -4,7 +4,7 @@ import { useWorkout } from '../../context/WorkoutContext';
 import ExerciseCard from '../active-session/ExerciseCard';
 
 const TemplateBuilder = ({ initialTemplate, onBack, onAddExercise, onSaveComplete }) => {
-    const { cart, removeFromCart, updateCartItem, saveTemplate, updateTemplate, deleteTemplate, clearCart, routines } = useWorkout();
+    const { cart, removeFromCart, updateCartItem, saveTemplate, updateTemplate, deleteTemplate, clearCart, routines, addRoutine } = useWorkout();
     
     // Global Expand/Collapse Logic
     const [expandedIds, setExpandedIds] = useState(() => new Set());
@@ -34,6 +34,18 @@ const TemplateBuilder = ({ initialTemplate, onBack, onAddExercise, onSaveComplet
     
     const [templateName, setTemplateName] = useState(initialTemplate ? initialTemplate.name : '');
     const [selectedRoutineId, setSelectedRoutineId] = useState(initialTemplate ? initialTemplate.folderId : null);
+
+    const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+    const [newFolderName, setNewFolderName] = useState('');
+
+    const handleCreateFolder = () => {
+        if (!newFolderName.trim()) return;
+        // The id will be slightly off from Date.now() used in addRoutine, but since the component re-renders with the new routines array, it's safer to just pick it up next time, but to auto-select it, we can guess the ID or modify addRoutine to return it.
+        // Since we can't easily auto-select without modifying addRoutine, we'll just close it and let them click it. Or we can just modify WorkoutContext to return the newly added routine. Let's make it simple: just add it, it appears, user taps it.
+        addRoutine(newFolderName.trim());
+        setNewFolderName('');
+        setIsCreatingFolder(false);
+    };
 
     const isDuplicateName = () => {
         if (!templateName.trim()) return false;
@@ -132,6 +144,7 @@ const TemplateBuilder = ({ initialTemplate, onBack, onAddExercise, onSaveComplet
                             onToggleExpand={() => toggleExpand(exercise.id)}
                             onRemove={() => removeFromCart(exercise.id)}
                             onUpdateSets={(newSets) => updateCartItem(exercise.id, { sets: newSets })}
+                            onUpdateExercise={(updates) => updateCartItem(exercise.id, updates)}
                             isBuilderMode={true}
                         />
                     ))
@@ -154,7 +167,7 @@ const TemplateBuilder = ({ initialTemplate, onBack, onAddExercise, onSaveComplet
                                 className="py-4 w-full bg-[#002E5D] text-white font-bold rounded-2xl text-sm uppercase tracking-wide shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
                             >
                                 <Save className="w-5 h-5" />
-                                Save Template
+                                {initialTemplate ? 'Update Template' : 'Save Template'}
                             </button>
 
                             {initialTemplate && (
@@ -234,12 +247,20 @@ const TemplateBuilder = ({ initialTemplate, onBack, onAddExercise, onSaveComplet
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShowSaveModal(false)} />
                     <div className="bg-[#111] border-t border-white/10 rounded-t-2xl w-full px-6 pt-6 pb-32 sm:pb-12 animate-slide-up shadow-2xl relative z-10 max-h-[85vh] overflow-y-auto">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-xl font-bold text-white">Save Template</h3>
+                            <h3 className="text-xl font-bold text-white">{initialTemplate ? 'Update Template' : 'Save Template'}</h3>
                             <button onClick={() => setShowSaveModal(false)} className="text-white/40 hover:text-white">
                                 <XIcon className="w-5 h-5" />
                             </button>
                         </div>
                         <div className="space-y-4">
+                            {initialTemplate && (
+                                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3 flex gap-3 text-yellow-500">
+                                    <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+                                    <p className="text-xs leading-relaxed font-medium">
+                                        You are updating an existing template. Confirming will overwrite the original version.
+                                    </p>
+                                </div>
+                            )}
                             <div>
                                 <input
                                     type="text"
@@ -259,24 +280,64 @@ const TemplateBuilder = ({ initialTemplate, onBack, onAddExercise, onSaveComplet
 
                             {/* Folder Selection */}
                             <div className="pt-2">
-                                <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3 px-1">Save to Library Folder</h4>
-                                <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-2 px-1 -mx-2 sm:mx-0 sm:px-0">
-                                    <div className="w-2 shrink-0 sm:hidden"></div>
-                                    {routines.map(routine => (
-                                        <button
-                                            key={routine.id}
-                                            onClick={() => setSelectedRoutineId(routine.id)}
-                                            className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 whitespace-nowrap ${
-                                                selectedRoutineId === routine.id
-                                                    ? 'bg-primary text-white shadow-[0_0_15px_rgba(0,46,93,0.5)]'
-                                                    : 'bg-white/5 text-white/60 hover:bg-white/10'
-                                            }`}
-                                        >
-                                            {routine.name}
-                                        </button>
-                                    ))}
-                                    <div className="w-2 shrink-0 sm:hidden"></div>
+                                <div className="flex items-center justify-between mb-3 px-1">
+                                    <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Save to Library Folder</h4>
                                 </div>
+                                
+                                {isCreatingFolder ? (
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Folder Name..."
+                                            value={newFolderName}
+                                            onChange={(e) => setNewFolderName(e.target.value)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleCreateFolder()}
+                                            className="flex-1 h-10 bg-white/5 border border-white/10 rounded-xl px-3 text-sm text-white focus:border-primary outline-none transition-colors"
+                                            autoFocus
+                                        />
+                                        <button 
+                                            onClick={handleCreateFolder}
+                                            disabled={!newFolderName.trim()}
+                                            className="h-10 px-4 bg-primary text-white text-sm font-bold rounded-xl disabled:opacity-50 transition-all active:scale-95"
+                                        >
+                                            Add
+                                        </button>
+                                        <button 
+                                            onClick={() => setIsCreatingFolder(false)}
+                                            className="h-10 w-10 flex items-center justify-center bg-white/5 text-white/40 hover:text-white rounded-xl transition-colors"
+                                        >
+                                            <XIcon className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-2 px-1 -mx-2 sm:mx-0 sm:px-0">
+                                        <div className="w-2 shrink-0 sm:hidden"></div>
+                                        {routines.map(routine => (
+                                            <button
+                                                key={routine.id}
+                                                onClick={() => setSelectedRoutineId(routine.id)}
+                                                className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 whitespace-nowrap ${
+                                                    selectedRoutineId === routine.id
+                                                        ? 'bg-primary text-white shadow-[0_0_15px_rgba(0,46,93,0.5)]'
+                                                        : 'bg-white/5 text-white/60 hover:bg-white/10'
+                                                }`}
+                                            >
+                                                {routine.name}
+                                            </button>
+                                        ))}
+                                        {routines.length === 0 && (
+                                            <span className="text-xs text-white/40 py-2 inline-block italic shrink-0">No folders exist.</span>
+                                        )}
+                                        <button
+                                            onClick={() => setIsCreatingFolder(true)}
+                                            className="shrink-0 px-3 py-2 rounded-xl text-xs font-bold bg-white/5 border border-dashed border-white/20 text-white/60 hover:text-white transition-all active:scale-95 flex items-center gap-1 whitespace-nowrap"
+                                        >
+                                            <Plus className="w-3 h-3" />
+                                            New Folder
+                                        </button>
+                                        <div className="w-2 shrink-0 sm:hidden"></div>
+                                    </div>
+                                )}
                             </div>
 
                             <button
@@ -284,7 +345,7 @@ const TemplateBuilder = ({ initialTemplate, onBack, onAddExercise, onSaveComplet
                                 disabled={!templateName.trim() || isDuplicateName() || !selectedRoutineId}
                                 className="w-full mt-4 h-14 bg-[#002E5D] text-white font-bold rounded-xl shadow-[0_4px_20px_rgba(0,46,93,0.4)] disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98]"
                             >
-                                Save to Library
+                                {initialTemplate ? 'Confirm Update' : 'Save to Library'}
                             </button>
                         </div>
                     </div>

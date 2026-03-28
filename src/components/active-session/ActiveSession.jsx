@@ -195,6 +195,7 @@ const ActiveSession = ({ onBack, onAddExercise, onFinishSession }) => {
                             onToggleExpand={() => toggleExpand(exercise.id)}
                             onRemove={() => removeFromCart(exercise.id)}
                             onUpdateSets={(newSets) => updateCartItem(exercise.id, { sets: newSets })}
+                            onUpdateExercise={(updates) => updateCartItem(exercise.id, updates)}
                         />
                     ))
                 )}
