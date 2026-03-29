@@ -55,7 +55,7 @@ const ProgressCircle = ({ total, completed }) => {
     );
 };
 
-const SwipeableSetRow = ({ children, onDelete, onCopy }) => {
+const SwipeableSetRow = ({ children, onDelete }) => {
     const [offsetX, setOffsetX] = useState(0);
     const startX = useRef(0);
     const isDragging = useRef(false);
@@ -74,9 +74,12 @@ const SwipeableSetRow = ({ children, onDelete, onCopy }) => {
         if (!isDragging.current) return;
         const currentX = e.clientX;
         const diff = currentX - startX.current;
-        // Allow swiping left (delete) and right (copy), capped at 100px
-        if (diff > -100 && diff < 100) {
+        
+        // Only allow swiping left (delete), cap right-swipe at 0
+        if (diff <= 0 && diff > -100) {
             setOffsetX(diff);
+        } else if (diff > 0) {
+            setOffsetX(0);
         }
     };
 
@@ -89,21 +92,15 @@ const SwipeableSetRow = ({ children, onDelete, onCopy }) => {
 
         if (offsetX < -50) {
             onDelete();
-            setOffsetX(0); 
-        } else if (offsetX > 50) {
-            onCopy();
-            setOffsetX(0);
-        } else {
-            setOffsetX(0); // Snap back
         }
+        setOffsetX(0); // Always snap back
     };
 
     return (
         <div className="relative overflow-hidden group/swipe rounded-lg">
-            {/* Background Base (reveals depending on swipe direction) */}
-            <div className={`absolute inset-0 z-0 transition-opacity duration-200 flex items-center ${offsetX > 0 ? 'bg-green-500/80 justify-start pl-6 opacity-100' : offsetX < 0 ? 'bg-red-500/80 justify-end pr-6 opacity-100' : 'opacity-0'}`}>
-                {offsetX > 0 && <Copy className="w-5 h-5 text-white" />}
-                {offsetX < 0 && <Trash2 className="w-5 h-5 text-white" />}
+            {/* Background Base (Left-swipe only for Delete) */}
+            <div className={`absolute inset-0 z-0 transition-opacity duration-200 flex items-center bg-red-500/80 justify-end pr-6 ${offsetX < 0 ? 'opacity-100' : 'opacity-0'}`}>
+                <Trash2 className="w-5 h-5 text-white" />
             </div>
 
             {/* Foreground Content */}
@@ -111,14 +108,14 @@ const SwipeableSetRow = ({ children, onDelete, onCopy }) => {
                 className="relative z-10 bg-[#111] transition-transform duration-200 ease-out flex items-center rounded-lg w-full"
                 style={{ 
                     transform: `translateX(${offsetX}px)`,
-                    touchAction: 'pan-y', // allows continuous vertical scrolling natively, prevents horizontal gesture zooming
-                    userSelect: 'none' // prevents accidental text highlight while dragging with mouse
+                    touchAction: 'pan-y', 
+                    userSelect: 'none' 
                 }}
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUpOrCancel}
                 onPointerCancel={onPointerUpOrCancel}
-                onClick={() => offsetX !== 0 && setOffsetX(0)} // Tap anywhere to snap back if stuck
+                onClick={() => offsetX !== 0 && setOffsetX(0)}
             >
                 {children}
             </div>
@@ -145,7 +142,10 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
     if (showReps) midCols.push('1fr');
     if (showTime) midCols.push('1fr');
     if (showRpe && !isBuilderMode) midCols.push('1fr');
-    if (!isBuilderMode) midCols.push('2rem'); 
+    if (!isBuilderMode) {
+        midCols.push('1.5rem'); // Copy Set
+        midCols.push('2rem');   // Toggle Done
+    }
     if (isBuilderMode) midCols.push('4rem');
 
     const gridTemplateColumns = `2rem ${midCols.join(' ')}`;
@@ -167,11 +167,11 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
         const lastSet = sets[sets.length - 1];
         const newSet = {
             id: Date.now() + Math.random(),
-            weight: isBuilderMode ? '' : (lastSet ? lastSet.weight : ''),
-            reps: isBuilderMode ? '' : (lastSet ? lastSet.reps : ''),
-            distance: isBuilderMode ? '' : (lastSet ? lastSet.distance : ''),
-            time: isBuilderMode ? '' : (lastSet ? lastSet.time : ''),
-            rpe: 0,
+            weight: lastSet ? lastSet.weight : '',
+            reps: lastSet ? lastSet.reps : '',
+            distance: lastSet ? lastSet.distance : '',
+            time: lastSet ? lastSet.time : '',
+            rpe: lastSet ? lastSet.rpe : 0,
             completed: false
         };
         onUpdateSets([...sets, newSet]);
@@ -195,30 +195,18 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
 
     const copySetRow = (index) => {
         const sourceSet = sets[index];
-        const newSets = [...sets];
+        const newSet = {
+            id: Date.now() + Math.random(),
+            weight: sourceSet.weight,
+            reps: sourceSet.reps,
+            distance: sourceSet.distance,
+            time: sourceSet.time,
+            rpe: sourceSet.rpe,
+            completed: false
+        };
         
-        const firstEmptyIndex = newSets.findIndex(s => !s.weight && !s.reps && !s.distance && !s.time);
-        
-        if (firstEmptyIndex !== -1) {
-            newSets[firstEmptyIndex] = {
-                ...newSets[firstEmptyIndex],
-                weight: sourceSet.weight,
-                reps: sourceSet.reps,
-                distance: sourceSet.distance,
-                time: sourceSet.time
-            };
-        } else {
-            newSets.push({
-                id: Date.now() + Math.random(),
-                weight: sourceSet.weight,
-                reps: sourceSet.reps,
-                distance: sourceSet.distance,
-                time: sourceSet.time,
-                rpe: 0,
-                completed: false
-            });
-        }
-        onUpdateSets(newSets);
+        // Append to the bottom (Standard logging preference)
+        onUpdateSets([...sets, newSet]);
     };
 
     const adjustSetCount = (count) => {
@@ -335,7 +323,7 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
                     {/* Sets */}
                     <div className="space-y-3">
                         {sets.map((set, index) => (
-                            <SwipeableSetRow key={set.id} onDelete={() => removeSet(set.id)} onCopy={() => copySetRow(index)}>
+                            <SwipeableSetRow key={set.id} onDelete={() => removeSet(set.id)}>
                                 <div key={set.id} className="grid gap-2 items-center w-full bg-[#111] pr-1" style={{ gridTemplateColumns }}>
                                     <span className="text-sm font-bold text-white/40 flex justify-center">{index + 1}</span>
 
@@ -389,15 +377,24 @@ const ExerciseCard = ({ exercise, isExpanded, onToggleExpand, onRemove, onUpdate
                                     )}
 
                                     {!isBuilderMode && (
-                                        <button
-                                            onClick={() => toggleSetComplete(set.id)}
-                                            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all mx-auto ${set.completed
-                                                ? 'bg-primary text-white shadow-[0_0_10px_rgba(0,46,93,0.5)]'
-                                                : 'bg-white/5 text-transparent border border-white/10 hover:border-primary/50'
-                                                }`}
-                                        >
-                                            <Check className="w-5 h-5" />
-                                        </button>
+                                        <>
+                                            <button
+                                                title="Duplicate Row"
+                                                onClick={() => copySetRow(index)}
+                                                className="w-7 h-7 rounded-md flex items-center justify-center text-white/20 hover:text-white hover:bg-white/10 active:scale-95 transition-all outline-none"
+                                            >
+                                                <Copy className="w-3.5 h-3.5" />
+                                            </button>
+                                            <button
+                                                onClick={() => toggleSetComplete(set.id)}
+                                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all mx-auto ${set.completed
+                                                    ? 'bg-primary text-white shadow-[0_0_10px_rgba(0,46,93,0.5)]'
+                                                    : 'bg-white/5 text-transparent border border-white/10 hover:border-primary/50'
+                                                    }`}
+                                            >
+                                                <Check className="w-5 h-5" />
+                                            </button>
+                                        </>
                                     )}
 
                                     {isBuilderMode && (

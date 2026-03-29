@@ -16,6 +16,10 @@ import { ChallengeProvider, useChallenge } from './context/ChallengeContext';
 
 import Dashboard from './components/Dashboard';
 import ChallengesTab from './components/challenges/ChallengesTab';
+import AuthView from './components/auth/AuthView';
+import OnboardingView from './components/auth/OnboardingView';
+import { auth } from './firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const Logger = ({ openCart, onTabChange, initialAction }) => {
   const [view, setView] = useState(initialAction === 'empty' ? 'directory' : 'hub'); // hub | directory | library | session | folder
@@ -212,30 +216,82 @@ const Logger = ({ openCart, onTabChange, initialAction }) => {
   );
 };
 
+const AppContent = ({ activeTab, handleTabChange, isCartOpen, setIsCartOpen, loggerInitialAction, setLoggerInitialAction }) => {
+  const { profile, profileLoading, saveProfile } = useChallenge();
+
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return <OnboardingView onComplete={saveProfile} loading={profileLoading} />;
+  }
+
+  return (
+    <Layout activeTab={activeTab} onTabChange={handleTabChange}>
+      {activeTab === 'dashboard' && <Dashboard 
+        onTabChange={handleTabChange}
+        onStartWorkout={() => {
+          setLoggerInitialAction('empty');
+          handleTabChange('logger');
+        }} 
+      />}
+      {activeTab === 'challenges' && <ChallengesTab />}
+      {activeTab === 'logger' && <Logger openCart={() => setIsCartOpen(true)} onTabChange={handleTabChange} initialAction={loggerInitialAction} />}
+      {activeTab === 'history' && <History />}
+
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+    </Layout>
+  );
+};
+
 function App() {
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard'); // Default to Dashboard
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [loggerInitialAction, setLoggerInitialAction] = useState(null);
+
+  React.useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleTabChange = (tab) => {
     if (tab === 'logger') setLoggerInitialAction(null);
     setActiveTab(tab);
   };
 
-  return (
-    <ChallengeProvider>
-      <WorkoutProvider>
-        <Layout activeTab={activeTab} onTabChange={handleTabChange}>
-          {activeTab === 'dashboard' && <Dashboard onStartWorkout={() => {
-            setLoggerInitialAction('empty');
-            setActiveTab('logger');
-          }} />}
-          {activeTab === 'challenges' && <ChallengesTab />}
-          {activeTab === 'logger' && <Logger openCart={() => setIsCartOpen(true)} onTabChange={setActiveTab} initialAction={loggerInitialAction} />}
-          {activeTab === 'history' && <History />}
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
-          <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-        </Layout>
+  if (!user) {
+    return <AuthView />;
+  }
+
+  return (
+    <ChallengeProvider user={user}>
+      <WorkoutProvider user={user}>
+        <AppContent 
+          activeTab={activeTab}
+          handleTabChange={handleTabChange}
+          isCartOpen={isCartOpen}
+          setIsCartOpen={setIsCartOpen}
+          loggerInitialAction={loggerInitialAction}
+          setLoggerInitialAction={setLoggerInitialAction}
+        />
       </WorkoutProvider>
     </ChallengeProvider>
   );

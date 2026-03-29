@@ -1,9 +1,12 @@
 import React, { useMemo } from 'react';
-import { Activity, Dumbbell, Calendar, Zap, ArrowRight, Play } from 'lucide-react';
+import { Activity, Dumbbell, Calendar, Zap, ArrowRight, Play, LogOut } from 'lucide-react';
 import { useWorkout } from '../context/WorkoutContext';
+import { useChallenge } from '../context/ChallengeContext';
+import { auth } from '../firebase';
 
-const Dashboard = ({ onStartWorkout }) => {
+const Dashboard = ({ onStartWorkout, onTabChange }) => {
     const { sessions } = useWorkout();
+    const { activeChallenge, currentUser } = useChallenge();
 
     // 1. Calculations: Weekly Volume
     const currentWeekVolume = useMemo(() => {
@@ -55,19 +58,51 @@ const Dashboard = ({ onStartWorkout }) => {
     return (
         <div className="h-full flex flex-col bg-[#0a0a0a] text-white animate-fade-in pb-24 relative overflow-y-auto">
             {/* Header / Greeting */}
-            <div className="px-6 py-8 pb-6 relative z-10">
-                <h1 className="text-3xl font-black italic tracking-tighter uppercase relative z-20">
-                    Command
-                    <br />
-                    <span className="text-primary">Center</span>
-                </h1>
-                <p className="text-white/40 text-sm mt-1 relative z-20">Welcome back. Ready to work?</p>
+            <div className="px-6 py-8 pb-6 relative z-10 flex justify-between items-start">
+                <div>
+                    <h1 className="text-3xl font-black italic tracking-tighter uppercase relative z-20">
+                        Command
+                        <br />
+                        <span className="text-primary">Center</span>
+                    </h1>
+                    <p className="text-white/40 text-sm mt-1 relative z-20">Welcome back, {currentUser?.name || 'Athlete'}.</p>
+                </div>
+                
+                <div className="flex flex-col items-end gap-3 relative z-20">
+                    <div className="w-14 h-14 bg-white/5 border border-white/10 rounded-[1.5rem] flex items-center justify-center text-3xl shadow-2xl">
+                        {currentUser?.emoji || '🐺'}
+                    </div>
+                    <button 
+                        onClick={() => auth.signOut()}
+                        className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-white/20 hover:text-red-400 transition-colors"
+                    >
+                        <LogOut className="w-3 h-3" />
+                        Sign Out
+                    </button>
+                </div>
 
                 {/* Background wash */}
                 <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none z-10"></div>
             </div>
 
             <div className="px-4 space-y-6 flex-1 relative z-20">
+                {/* New Athlete Onboarding Card */}
+                {!activeChallenge && (
+                    <div className="bg-primary/10 border border-primary/20 rounded-[2.5rem] p-6 relative overflow-hidden animate-pulse-subtle">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                        <h3 className="text-xl font-black italic uppercase tracking-tight text-white mb-2">No Active Mission</h3>
+                        <p className="text-white/60 text-xs mb-4 leading-relaxed">
+                            Your dashboard is standby. Launch a Solo challenge or assemble a Squad to begin tracking your objectives.
+                        </p>
+                        <button 
+                            onClick={() => onTabChange('challenges')}
+                            className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold uppercase tracking-widest text-[10px] flex items-center gap-2 hover:bg-primary/90 transition-all active:scale-95"
+                        >
+                            <span>Initialize Challenge</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                    </div>
+                )}
 
                 {/* Primary CTA */}
                 <button

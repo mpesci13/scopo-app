@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, Calendar, Plus, X, ArrowLeft, RefreshCw, Layers, Pencil, Check } from 'lucide-react';
+import { Target, Calendar, Plus, X, ArrowLeft, RefreshCw, Layers, Pencil, Check, User, UserPlus } from 'lucide-react';
 import { useChallenge } from '../../context/ChallengeContext';
 
 const CreateChallengeFlow = ({ onBack, onComplete, initialTemplate = null, challengeToEdit = null }) => {
@@ -23,6 +23,10 @@ const CreateChallengeFlow = ({ onBack, onComplete, initialTemplate = null, chall
     const [targetDate, setTargetDate] = useState('');
 
     const [rules, setRules] = useState(challengeToEdit?.rules || initialTemplate?.rules || []);
+
+    // Squad Logic
+    const [isShared, setIsShared] = useState(challengeToEdit?.isShared || false);
+    const [squadName, setSquadName] = useState(challengeToEdit?.squadName || '');
 
     // Edit Rule State
     const [editingRuleId, setEditingRuleId] = useState(null);
@@ -105,10 +109,15 @@ const CreateChallengeFlow = ({ onBack, onComplete, initialTemplate = null, chall
             updateChallenge(challengeToEdit.id, {
                 title: title.trim(),
                 durationDays: calculatedDays,
-                rules
+                rules,
+                isShared,
+                squadName: isShared ? squadName.trim() : ''
             });
         } else {
-            createCustomChallenge(title.trim(), calculatedDays, rules);
+            createCustomChallenge(title.trim(), calculatedDays, rules, {
+                isShared,
+                squadName: isShared ? squadName.trim() : ''
+            });
         }
 
         if (onComplete) onComplete();
@@ -146,47 +155,59 @@ const CreateChallengeFlow = ({ onBack, onComplete, initialTemplate = null, chall
                     </div>
 
                     <div>
-                        <label className="text-xs font-bold text-white/40 uppercase tracking-widest mb-2 block">
-                            Duration Setup
+                        <label className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3 block">
+                            Mission Type
                         </label>
-                        
-                        <div className="flex gap-2 mb-3 bg-white/5 p-1 rounded-xl">
-                            {['days', 'weeks', 'date'].map(type => (
-                                <button
-                                    key={type}
-                                    onClick={() => setDurationType(type)}
-                                    className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                                        durationType === type 
-                                            ? 'bg-primary text-white shadow-md' 
-                                            : 'text-white/40 hover:text-white/80 hover:bg-white/10'
-                                    }`}
-                                >
-                                    {type}
-                                </button>
-                            ))}
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                onClick={() => setIsShared(false)}
+                                className={`p-4 rounded-2xl border transition-all text-left group ${
+                                    !isShared 
+                                        ? 'bg-primary/10 border-primary/50' 
+                                        : 'bg-white/5 border-white/10 hover:border-white/20'
+                                }`}
+                            >
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${
+                                    !isShared ? 'bg-primary text-white' : 'bg-white/10 text-white/40'
+                                }`}>
+                                    <User className="w-4 h-4" />
+                                </div>
+                                <span className={`text-sm font-bold block ${!isShared ? 'text-white' : 'text-white/40'}`}>Solo Mission</span>
+                                <span className="text-[10px] text-white/20">Private to you</span>
+                            </button>
+
+                            <button
+                                onClick={() => setIsShared(true)}
+                                className={`p-4 rounded-2xl border transition-all text-left group ${
+                                    isShared 
+                                        ? 'bg-primary/10 border-primary/50' 
+                                        : 'bg-white/5 border-white/10 hover:border-white/20'
+                                }`}
+                            >
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${
+                                    isShared ? 'bg-primary text-white' : 'bg-white/10 text-white/40'
+                                }`}>
+                                    <Layers className="w-4 h-4" />
+                                </div>
+                                <span className={`text-sm font-bold block ${isShared ? 'text-white' : 'text-white/40'}`}>Shared Squad</span>
+                                <span className="text-[10px] text-white/20">Invite others</span>
+                            </button>
                         </div>
 
-                        <div className="relative">
-                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none" />
-                            {durationType === 'date' ? (
+                        {isShared && (
+                            <div className="mt-4 animate-in slide-in-from-top-2 duration-300">
+                                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2 block px-1">
+                                    Squad Name
+                                </label>
                                 <input
-                                    type="date"
-                                    min={new Date().toISOString().split('T')[0]}
-                                    value={targetDate}
-                                    onChange={(e) => setTargetDate(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-base text-white font-medium focus:border-primary focus:outline-none transition-colors [color-scheme:dark]"
+                                    type="text"
+                                    placeholder="e.g. The Elite 8, Morning Crew"
+                                    value={squadName}
+                                    onChange={(e) => setSquadName(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:border-primary focus:outline-none transition-colors"
                                 />
-                            ) : (
-                                <input
-                                    type="number"
-                                    min="1"
-                                    max={durationType === 'weeks' ? 52 : 365}
-                                    value={durationValue}
-                                    onChange={(e) => setDurationValue(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-lg text-white font-medium focus:border-primary focus:outline-none transition-colors"
-                                />
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
